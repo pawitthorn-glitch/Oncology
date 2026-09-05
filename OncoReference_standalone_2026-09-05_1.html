@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onco Reference</title>
+<meta name="description" content="Personal oncology clinical-reference summaries — offline static export, no login required.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Taviraj:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root{
+    --paper:#eef1ee;
+    --surface:#ffffff;
+    --surface-2:#e6ebe7;
+    --ink:#1c2422;
+    --ink-soft:#4b5650;
+    --line:#d7ddd8;
+    --line-soft:#e3e8e4;
+    --accent:#2f6f62;
+    --accent-ink:#173a33;
+    --accent-soft:#dbe8e4;
+    --amber:#8a6416;
+    --amber-soft:#f3e6cd;
+    --rose:#8f3b34;
+    --rose-soft:#f1ddd9;
+    --shadow: 0 1px 2px rgba(28,36,34,.06), 0 8px 24px -12px rgba(28,36,34,.18);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper:#161c1a;
+      --surface:#1e2624;
+      --surface-2:#26302d;
+      --ink:#eef1ee;
+      --ink-soft:#aab6b0;
+      --line:#354039;
+      --line-soft:#2c3733;
+      --accent:#6fbaa8;
+      --accent-ink:#d9efe9;
+      --accent-soft:#243c37;
+      --amber:#d9b164;
+      --amber-soft:#3a301c;
+      --rose:#d99089;
+      --rose-soft:#3a2523;
+      --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper:#161c1a;
+    --surface:#1e2624;
+    --surface-2:#26302d;
+    --ink:#eef1ee;
+    --ink-soft:#aab6b0;
+    --line:#354039;
+    --line-soft:#2c3733;
+    --accent:#6fbaa8;
+    --accent-ink:#d9efe9;
+    --accent-soft:#243c37;
+    --amber:#d9b164;
+    --amber-soft:#3a301c;
+    --rose:#d99089;
+    --rose-soft:#3a2523;
+    --shadow: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px -12px rgba(0,0,0,.5);
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:"IBM Plex Sans Thai","IBM Plex Sans",system-ui,sans-serif;
+    font-size:15px;
+    line-height:1.55;
+  }
+  h1,h2,h3,.display{
+    font-family:"Taviraj","Noto Serif Thai",Georgia,serif;
+    font-weight:600;
+    text-wrap:balance;
+    letter-spacing:.01em;
+    margin:0;
+  }
+  .mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums;}
+
+  .app{
+    display:grid;
+    grid-template-columns: 320px 1fr;
+    min-height:100vh;
+  }
+  @media (max-width: 860px){
+    .app{grid-template-columns: 1fr;}
+    .rail{border-right:none;border-bottom:1px solid var(--line);}
+  }
+
+  /* ---------- left rail ---------- */
+  .rail{
+    border-right:1px solid var(--line);
+    background:var(--surface);
+    display:flex;
+    flex-direction:column;
+    min-height:100vh;
+  }
+  .rail-head{
+    padding:22px 20px 16px;
+    border-bottom:1px solid var(--line-soft);
+  }
+  .eyebrow{
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-weight:600;
+  }
+  .rail-head h1{font-size:22px; margin-top:4px;}
+  .rail-head .sub{color:var(--ink-soft); font-size:13px; margin-top:6px;}
+
+  .search{
+    margin:14px 20px 8px;
+    position:relative;
+  }
+  .search input{
+    width:100%;
+    padding:9px 12px 9px 32px;
+    border:1px solid var(--line);
+    border-radius:8px;
+    background:var(--paper);
+    color:var(--ink);
+    font:inherit;
+    font-size:13.5px;
+  }
+  .search input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .search svg{position:absolute; left:10px; top:50%; transform:translateY(-50%); opacity:.55; width:14px; height:14px;}
+
+  .groups{flex:1; overflow-y:auto; padding:6px 10px 20px;}
+  .group-label{
+    font-size:11px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    padding:16px 10px 6px;
+    font-weight:600;
+  }
+  .item{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    width:100%;
+    text-align:left;
+    padding:9px 10px;
+    border:none;
+    background:transparent;
+    border-radius:8px;
+    cursor:pointer;
+    color:var(--ink);
+    font:inherit;
+    font-size:13.5px;
+  }
+  .item:hover{background:var(--surface-2);}
+  .item.active{background:var(--accent-soft); color:var(--accent-ink); font-weight:600;}
+  .item .name{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .item .name .sub{display:block; font-size:11px; color:var(--ink-soft); font-weight:400;}
+  .item.active .name .sub{color:var(--accent-ink); opacity:.75;}
+
+  .dot{width:7px; height:7px; border-radius:50%; flex-shrink:0;}
+  .dot.ready{background:var(--accent);}
+  .dot.pending{background:transparent; border:1.5px solid var(--amber);}
+  .dot.template{background:var(--rose);}
+
+  .rail-foot{
+    border-top:1px solid var(--line-soft);
+    padding:14px 20px 18px;
+    font-size:12px;
+    color:var(--ink-soft);
+  }
+  .rail-foot b{color:var(--ink);}
+
+  /* ---------- main ---------- */
+  main{padding:36px 44px 60px; max-width:920px;}
+  @media (max-width:640px){ main{padding:24px 18px 48px;} }
+
+  .empty{
+    max-width:560px;
+    margin-top:24px;
+  }
+  .empty h2{font-size:26px;}
+  .empty p{color:var(--ink-soft); margin-top:12px;}
+  .howto{
+    margin-top:24px;
+    padding:18px 20px;
+    background:var(--surface);
+    border:1px solid var(--line);
+    border-radius:10px;
+  }
+  .howto ol{margin:10px 0 0; padding-left:20px;}
+  .howto li{margin-bottom:6px; font-size:13.5px;}
+  .howto li b{color:var(--accent-ink); background:var(--accent-soft); padding:0 3px; border-radius:3px;}
+
+  .detail-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .detail-head h2{font-size:30px;}
+  .detail-head .sub{color:var(--ink-soft); font-size:14px; margin-top:4px;}
+
+  .badge{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    padding:5px 11px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:600;
+    white-space:nowrap;
+  }
+  .badge.ready{background:var(--accent-soft); color:var(--accent-ink);}
+  .badge.pending{background:var(--amber-soft); color:var(--amber);}
+  .badge.template{background:var(--rose-soft); color:var(--rose);}
+
+  .pending-note{
+    margin-top:22px;
+    padding:16px 18px;
+    border:1px dashed var(--line);
+    border-radius:10px;
+    color:var(--ink-soft);
+    font-size:13.5px;
+    background:var(--surface);
+  }
+
+  .template-flag{
+    margin-top:18px;
+    padding:10px 14px;
+    background:var(--rose-soft);
+    color:var(--rose);
+    border-radius:8px;
+    font-size:12.5px;
+    font-weight:600;
+  }
+
+  section.block{
+    margin-top:26px;
+    padding-top:22px;
+    border-top:1px solid var(--line-soft);
+  }
+  section.block:first-of-type{border-top:none; padding-top:0; margin-top:28px;}
+  section.block h3{
+    font-size:13px;
+    letter-spacing:.08em;
+    text-transform:uppercase;
+    color:var(--accent);
+    font-family:"IBM Plex Sans Thai",sans-serif;
+    font-weight:600;
+    margin-bottom:10px;
+  }
+  section.block .body{font-size:14.5px; color:var(--ink);}
+  section.block .body p{margin:0;}
+  section.block h3{display:flex; align-items:center; gap:8px;}
+  section.block h3 svg{width:15px; height:15px; flex-shrink:0;}
+
+  ul.bul{margin:0; padding-left:0; list-style:none;}
+  ul.bul li{
+    position:relative;
+    padding-left:20px;
+    margin-bottom:9px;
+    line-height:1.5;
+  }
+  ul.bul li:last-child{margin-bottom:0;}
+  ul.bul li::before{
+    content:"";
+    position:absolute;
+    left:2px; top:8px;
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--accent);
+  }
+  ul.bul li b, ul.bul li strong{color:var(--accent-ink); font-weight:600;}
+
+  .chip-row{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px;}
+  .chip{
+    display:inline-flex;
+    align-items:center;
+    padding:5px 12px;
+    border-radius:999px;
+    background:var(--surface-2);
+    border:1px solid var(--line);
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-soft);
+    font-family:"IBM Plex Mono",monospace;
+  }
+  .chip.on{background:var(--accent-soft); color:var(--accent-ink); border-color:transparent;}
+  .chip-caption{font-size:11.5px; color:var(--ink-soft); margin:-6px 0 12px;}
+
+  /* ---------- treatment stage pathway (visual per-stage summary) ---------- */
+  .stage-path{margin-bottom:18px;}
+  .stage-item{display:flex; gap:14px;}
+  .stage-marker{display:flex; flex-direction:column; align-items:center; flex-shrink:0; width:14px;}
+  .stage-marker .stage-dot{width:14px; height:14px; border-radius:50%; flex-shrink:0; border:2.5px solid var(--surface); box-shadow:0 0 0 1.5px currentColor;}
+  .stage-marker .stage-line{flex:1; width:2px; background:var(--line); margin-top:5px; min-height:16px;}
+  .stage-item:last-child .stage-marker .stage-line{display:none;}
+  .stage-body{flex:1; min-width:0; padding-bottom:16px;}
+  .stage-item:last-child .stage-body{padding-bottom:0;}
+  .stage-card{border-radius:10px; border:1px solid var(--line); background:var(--surface); padding:12px 14px; border-left:3px solid currentColor;}
+  .stage-card h4{margin:0 0 7px; font-size:13px; font-weight:700; letter-spacing:.01em;}
+  .stage-card .bul{margin:0;}
+  .stage-card .bul li{margin-bottom:6px;}
+  .stage-card .bul li:last-child{margin-bottom:0;}
+  .tone-accent{color:var(--accent);}
+  .tone-amber{color:var(--amber);}
+  .tone-rose{color:var(--rose);}
+  .tone-neutral{color:var(--ink-soft);}
+  .tone-accent.stage-card{background:var(--accent-soft);}
+  .tone-amber.stage-card{background:var(--amber-soft);}
+  .tone-rose.stage-card{background:var(--rose-soft);}
+  .tone-neutral.stage-card{background:var(--surface-2);}
+  .tone-accent.stage-card h4{color:var(--accent-ink);}
+  .tone-rose.stage-card h4{color:var(--rose);}
+  .tone-amber.stage-card h4{color:var(--amber);}
+  .tone-neutral.stage-card h4{color:var(--ink);}
+
+  .tx-table{border:1px solid var(--line); border-radius:10px; overflow:hidden; background:var(--surface);}
+  .tx-row{
+    display:grid;
+    grid-template-columns: 120px 1fr;
+    gap:16px;
+    padding:14px 16px;
+  }
+  .tx-row + .tx-row{border-top:1px solid var(--line-soft);}
+  .tx-row .line{
+    display:inline-block;
+    font-weight:600; font-size:11.5px; color:var(--accent-ink);
+    background:var(--accent-soft);
+    padding:3px 9px;
+    border-radius:6px;
+    margin-bottom:2px;
+  }
+  .tx-row .regimen{font-family:"IBM Plex Mono",monospace; font-size:12.5px; color:var(--ink-soft); margin-top:4px;}
+  .tx-row .evidence{font-size:11.5px; color:var(--ink-soft); margin-top:6px;}
+  .tx-row .evidence .mono{background:var(--surface-2); padding:1px 5px; border-radius:4px;}
+
+  ul.counsel{margin:0; padding-left:18px;}
+  ul.counsel li{margin-bottom:6px;}
+
+  .source-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    flex-wrap:wrap;
+    padding:14px 16px;
+    background:var(--surface-2);
+    border-radius:10px;
+    font-size:12.5px;
+  }
+  .source-card .name{font-weight:600;}
+  .source-card .meta{color:var(--ink-soft);}
+
+  ::-webkit-scrollbar{width:10px; height:10px;}
+  ::-webkit-scrollbar-thumb{background:var(--line); border-radius:6px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+
+  @media (prefers-reduced-motion: no-preference){
+    .item, main > *{transition: background .12s ease;}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="rail">
+    <div class="rail-head">
+      <div class="eyebrow">Personal Reference</div>
+      <h1>Onco Reference</h1>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="search" type="text" placeholder="ค้นหาชนิดมะเร็ง…" autocomplete="off">
+    </div>
+    <div class="groups" id="groups"></div>
+    <div class="rail-foot">
+      <b id="ready-count">0</b> จาก <span id="total-count">0</span> ชนิดมีสรุปแล้ว — ไฟล์ static, อัปเดตล่าสุด 2026-09-05
+    </div>
+  </nav>
+
+  <main id="main"></main>
+</div>
+<script>
+  // Static snapshot of the Onco Reference database, exported 2026-09-05.
+  // This makes the page fully self-contained — no Claude account, no network call needed.
+  var DATA = {"adr-management":{"clinical_presentation":["CINV risk factors: female sex, age under 50, prior history of CINV, non-drinker status, history of motion sickness, history of nausea/vomiting during pregnancy, and anticipatory anxiety before treatment.","Oral mucositis presents as painful oral ulceration that reduces oral intake; risk is highest with concurrent chemoradiation, particularly in head and neck cancer.","Hand-foot syndrome (palmar-plantar erythrodysesthesia) presents as symmetrical erythema, peeling, and pain of the palms and soles; classically associated with capecitabine and other cytotoxic agents."],"en":"Adverse Drug Reactions Management (Chemotherapy-Induced Toxicities)","epidemiology":["Covers three commonly encountered chemotherapy-related toxicities: chemotherapy-induced nausea and vomiting (CINV), oral mucositis, and hand-foot syndrome.","CINV is classified into 5 types: acute, delayed, anticipatory, breakthrough, and refractory.","Chemotherapy regimens are stratified by emetogenic risk — high (>90% vomiting risk if untreated), moderate (30-90%), low (10-30%), and minimal (<10%) — which determines the antiemetic prophylaxis strategy."],"follow_up":["Hand-foot syndrome severity is reassessed at 2 weeks after holding chemotherapy and starting topical steroid therapy; other follow-up intervals are not reported in the source."],"pathology":["CTCAE version 5.0 is used to grade all three toxicities and guide management intensity.","Hand-foot syndrome (from classic cytotoxics such as taxanes and doxorubicin, via drug concentration in eccrine sweat ducts; symmetrical/diffuse distribution, onset over weeks to months) is distinguished from hand-foot skin reaction (from multikinase inhibitors, via impaired repair of frictional trauma from PDGFR/VEGFR inhibition; localized to pressure points, onset over days to weeks) — both are graded using the same CTCAE term."],"regimens":[{"approach":"Antiemetic prophylaxis","evidence":"NCCN Antiemesis Guideline v2.2023","line":"CINV prophylaxis, high emetic risk (day 1)","regimen":"Preferred: Olanzapine 5-10mg PO + NK1 receptor antagonist + 5-HT3 receptor antagonist + Dexamethasone 12mg PO/IV. Alternative: Olanzapine + Palonosetron 0.25mg IV + Dexamethasone 12mg"},{"approach":"Antiemetic prophylaxis, continued","evidence":"NCCN Antiemesis Guideline v2.2023","line":"CINV prophylaxis, high emetic risk (days 2-4)","regimen":"Olanzapine 5-10mg PO daily; Aprepitant 80mg on days 2-3 (if used on day 1); Dexamethasone 8mg PO/IV daily"},{"approach":"Add an NK1 receptor antagonist","evidence":"Significantly higher complete response than palonosetron plus dexamethasone alone — 76.9% vs. 69.5% in the delayed phase (p=0.001), 88.4% vs. 85.0% in the acute phase (p=0.047)","line":"Breakthrough CINV, next-cycle escalation","regimen":"Netupitant 300mg plus Palonosetron 0.5mg fixed combination (Akynzeo) once, plus Dexamethasone 12mg IV once, plus Olanzapine 10mg on days 1-4"},{"approach":"Topical and supportive agents","evidence":"MASCC/ISOO clinical practice guidelines","line":"Oral mucositis prevention","regimen":"0.15% Benzydamine mouthwash 10mL, gargled ≥1 minute, 4-6 times/day; Honey 20mL applied before and after radiation; Oral glutamine 30g/day in 3 divided doses"},{"approach":"Stepwise analgesia per WHO pain ladder","evidence":"WHO pain ladder approach","line":"Oral mucositis pain management","regimen":"2% Lidocaine mouthwash, escalating to 0.2% morphine mouthwash, then systemic opioids if uncontrolled"},{"approach":"Hold the drug plus high-potency topical steroid","evidence":"Resume chemotherapy if the grade improves to Grade 1; consider discontinuation if it does not improve","line":"Hand-foot syndrome, Grade 3","regimen":"0.05% Betamethasone dipropionate ointment, 0.25% Desoximetasone ointment/cream, or 0.1% Mometasone furoate ointment; reassess at 2 weeks"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Adverse Drug Reactions Management chapter","version":"1st ed."},"stage_badges":["Grade 1","Grade 2","Grade 3","Grade 4/5"],"staging":["Nausea: Grade 1 (loss of appetite without change in eating habits) to Grade 2 (decreased oral intake without significant weight loss/dehydration) to Grade 3 (inadequate oral intake requiring tube feeding, TPN, or hospitalization).","Vomiting: Grade 1 (no intervention needed) up to Grade 5 (death).","Oral mucositis: Grade 1 (asymptomatic or mild) to Grade 2 (moderate pain or an ulcer not interfering with oral intake) to Grade 3 (severe pain interfering with oral intake) up to Grade 5 (death).","Hand-foot syndrome: Grade 1 (minimal skin changes without pain) to Grade 2 (skin changes with pain, limiting instrumental activities of daily living) to Grade 3 (severe skin changes with pain, limiting self-care)."],"status":"ready","th":"การจัดการอาการไม่พึงประสงค์จากยาต้านมะเร็ง","toxicity_monitoring":["CTCAE version 5.0 is used consistently to grade nausea, vomiting, oral mucositis, and hand-foot syndrome severity, guiding the threshold for intervention."],"treatment_overview":[{"heading":"Nausea & Vomiting (CINV)","items":["Prevention is matched to the emetogenic risk of the regimen per the NCCN Antiemesis guideline; high-emetic-risk regimens (e.g. doxorubicin/cyclophosphamide) require 4-drug prophylaxis (NK1 receptor antagonist, 5-HT3 receptor antagonist, dexamethasone, and olanzapine).","For breakthrough CINV, first check antiemetic adherence, then escalate the prophylactic regimen for the next cycle (e.g. adding an NK1 receptor antagonist); note that NK1 receptor antagonists inhibit CYP3A4 and roughly double dexamethasone's AUC, so dexamethasone dosing is adjusted accordingly.","Also rule out non-chemotherapy causes of nausea/vomiting before escalating antiemetic therapy: bowel obstruction, vestibular dysfunction, brain metastases, electrolyte disturbances (hypercalcemia, hyperglycemia, hyponatremia), uremia, gastroparesis, excessive secretions, or malignant ascites."],"tone":"neutral"},{"heading":"Oral Mucositis","items":["Prevention (head and neck chemoradiation): basic oral care (soft toothbrush, flossing, avoiding alcohol-based mouthwash, avoiding spicy/acidic food, sodium bicarbonate or saline rinses, pre-treatment dental evaluation), benzydamine mouthwash, topical honey application, and oral glutamine.","Pain management follows the WHO pain ladder — topical lidocaine, morphine, or doxepin mouthwash, escalating to systemic opioids if uncontrolled — alongside continued oral hygiene to prevent superinfection."],"tone":"neutral"},{"heading":"Hand-Foot Syndrome","items":["Prevention: 10% urea cream, avoiding friction and tight footwear/clothing, avoiding chemical irritants, and close self-monitoring.","Management at Grade 3: hold the causative drug, apply a high-potency topical steroid, and reassess in 2 weeks — resume chemotherapy if the grade improves to Grade 1, or consider discontinuing the regimen if it does not improve."],"tone":"neutral"}]},"bladder-cancer":{"clinical_presentation":["80-90% present with painless gross hematuria.","Irritative/obstructive voiding symptoms can occur: frequency, dysuria, urgency, incontinence.","Bone pain may occur with metastatic disease."],"en":"Bladder Cancer","epidemiology":["Smoking is the most important risk factor for urothelial (transitional cell) carcinoma.","Other risk factors include occupational exposure to aromatic amines, cyclophosphamide use, and Lynch syndrome.","Non-urothelial subtypes have distinct risk factors: chronic bladder inflammation and Schistosoma haematobium infection for squamous cell carcinoma, and urachal remnant for adenocarcinoma."],"follow_up":["Not reported in the source."],"pathology":["Cystoscopy with biopsy is diagnostic, visualizing tumor location and providing tissue for pathology.","CT or MRI of the abdomen and pelvis is used to assess local and distant extent.","Urinary cytology has low sensitivity.","Transurethral Resection of Bladder Tumor (TURBT) serves as both the diagnostic and initial therapeutic procedure."],"regimens":[{"approach":"Chemotherapy before cystectomy","evidence":"Standard neoadjuvant approach","line":"Neoadjuvant, muscle-invasive disease","regimen":"DDMVAC (dose-dense methotrexate/vinblastine/doxorubicin/cisplatin), or GC (gemcitabine/cisplatin)"},{"approach":"Platinum-based chemotherapy","evidence":"Cisplatin is the key active agent — used cautiously in renal impairment","line":"Metastatic, first line","regimen":"DDMVAC or GC; carboplatin-gemcitabine substituted if cisplatin-ineligible"},{"approach":"Checkpoint inhibitor","evidence":"IMvigor210, KEYNOTE-052, JAVELIN Bladder 100","line":"Metastatic, immunotherapy","regimen":"Atezolizumab or pembrolizumab (first line if cisplatin-ineligible); avelumab (maintenance after chemotherapy)"},{"approach":"FGFR inhibitor","evidence":"For biomarker-selected patients","line":"Metastatic, targeted therapy","regimen":"Erdafitinib, for FGFR2 or FGFR3 mutation"},{"approach":"ADC","evidence":"For previously treated advanced urothelial carcinoma","line":"Metastatic, antibody-drug conjugate","regimen":"Enfortumab vedotin"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Bladder Cancer chapter","version":"1st ed."},"stage_badges":["0","I","II","III","IV"],"staging":["AJCC TNM Staging System, 8th edition (2017)."],"status":"ready","th":"มะเร็งกระเพาะปัสสาวะ","toxicity_monitoring":["Not reported in the source."],"treatment_overview":[{"heading":"Non-Muscle-Invasive Disease","items":["TURBT, with consideration of adjuvant intravesical therapy (mitomycin C or Bacillus Calmette-Guerin)."],"tone":"accent"},{"heading":"Muscle-Invasive Disease","items":["Standard treatment is neoadjuvant chemotherapy (DDMVAC or GC regimen) followed by radical cystectomy or pelvic exenteration with pelvic lymph node dissection and ileal conduit formation; chemoradiation is an alternative when surgery is not feasible or is declined."],"tone":"amber"},{"heading":"Metastatic / Recurrent Disease","items":["Goal is palliation and survival prolongation — chemotherapy (approximately 40% response rate), radiation for bleeding or bone-pain palliation, immunotherapy, targeted therapy, and antibody-drug conjugates."],"tone":"rose"}]},"bone-tumor":{"clinical_presentation":["Ewing sarcoma: pain and an enlarging mass (e.g. at the hip/pelvis) developing over weeks to months.","Osteosarcoma: pain and swelling, sometimes following minor trauma or activity, classically around the knee in adolescents and young adults."],"en":"Bone Tumor (Ewing Sarcoma & Osteosarcoma)","epidemiology":["Not reported in the source — content is presented as two individual cases rather than population-level epidemiology."],"follow_up":["Surveillance imaging (e.g. MRI) is used post-surgery to monitor for local recurrence; a detailed schedule is not reported in the source."],"pathology":["Ewing sarcoma: imaging shows a permeative, lytic lesion with a soft-tissue mass; core biopsy shows small round blue cells, CD99-positive; the classic t(11;22) translocation may or may not be present.","Osteosarcoma: imaging shows a 'sunburst' or 'hair-on-end' periosteal reaction, classically at the distal femur; core biopsy confirms high-grade osteosarcoma.","Both require bone scan and CT chest/abdomen to exclude metastatic disease."],"regimens":[{"approach":"Multiagent chemotherapy","evidence":"INT-0091 trial — superior to VAC alone","line":"Ewing sarcoma, localized","regimen":"VAC (vincristine/doxorubicin/cyclophosphamide) alternating with IE (ifosfamide/etoposide), 12 total cycles (6 VAC, 6 IE)"},{"approach":"Chemotherapy before surgery","evidence":"Standard neoadjuvant regimen","line":"Osteosarcoma, neoadjuvant","regimen":"Doxorubicin 60-75mg/m2 plus Cisplatin 75-100mg/m2, every 3 weeks for 3-4 cycles"},{"approach":"Continue same chemotherapy","evidence":"Good pathologic response to neoadjuvant therapy","line":"Osteosarcoma, adjuvant, good response (≥90% necrosis)","regimen":"Doxorubicin plus cisplatin, total not exceeding 6 cycles"},{"approach":"Continue or switch chemotherapy","evidence":"For inadequate necrosis response to first-line neoadjuvant therapy","line":"Osteosarcoma, adjuvant, poor response (<90% necrosis)","regimen":"Doxorubicin plus cisplatin (≤6 cycles total), or switch to Ifosfamide 1.2-1.5g/m2 plus Etoposide 80-100mg/m2 on days 1-5 every 3 weeks (≤6 cycles), with filgrastim support considered"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Bone Tumor chapter","version":"1st ed."},"stage_badges":["Localized","Metastatic"],"staging":["The source describes disease as localized vs. metastatic rather than a formal TNM stage grouping; pelvic or axial Ewing sarcoma carries a worse prognosis than extremity lesions."],"status":"ready","th":"มะเร็งกระดูก","toxicity_monitoring":["Filgrastim (G-CSF) support may be used with ifosfamide/etoposide to reduce neutropenia risk; other toxicity details are not reported in the source."],"treatment_overview":[{"heading":"Ewing Sarcoma","items":["Localized disease: multidisciplinary team evaluation; multiagent chemotherapy (VAC alternating with IE) is standard and superior to VAC alone (INT-0091); local control is achieved with surgery or radiation, with no head-to-head randomized comparison between the two."],"tone":"accent"},{"heading":"Osteosarcoma","items":["Localized high-grade disease: multidisciplinary evaluation; neoadjuvant chemotherapy (doxorubicin plus cisplatin) for 3-4 cycles, followed by limb-sparing surgery (or amputation); post-operative pathologic response to chemotherapy guides further treatment — tumor necrosis ≥90% ('good response') continues the same regimen (total not exceeding 6 cycles); necrosis <90% may continue the same regimen or switch to ifosfamide plus etoposide."],"tone":"accent"}]},"breast-cancer":{"clinical_presentation":["Palpable breast mass — typically firm, irregular-margined, fixed to surrounding tissue.","Skin ulceration if the mass is near the surface; peau d'orange from dermal lymphatic obstruction.","Nipple retraction or bloody nipple discharge.","Ipsilateral axillary or cervical lymphadenopathy from lymphatic spread.","Metastatic symptoms: chronic cough/dyspnea (lung/pleura), bone pain (bone), abdominal fullness or jaundice (liver)."],"en":"Breast Cancer","epidemiology":["Incidence/prevalence figures are not reported in the source.","Female sex carries ~100x the risk of male sex.","Germline BRCA1/2 mutation confers a 60-70% lifetime risk.","Risk rises with age, and with cumulative estrogen exposure: menarche <12y, menopause >50y, nulliparity or late first pregnancy, no breastfeeding.","White race carries higher risk than Asian ethnicity.","Lifestyle factors: alcohol use, smoking, obesity."],"follow_up":["Not detailed in the source.","For BRCA carriers: cascade genetic testing of first-degree relatives is recommended.","Risk-reducing bilateral (nipple-sparing) mastectomy significantly reduces breast-cancer mortality.","Risk-reducing bilateral salpingo-oophorectomy reduces both ovarian- and breast-cancer mortality — offered per patient preference."],"pathology":["Core needle biopsy is the diagnostic standard (excisional biopsy for small, fully excisable masses; FNA to assess nodal spread).","Invasive ductal carcinoma is the commonest histology.","IHC-based intrinsic molecular subtyping (ER, PR, HER2, Ki-67; St. Gallen 2013) drives treatment: Luminal A-like → endocrine therapy; Luminal B-like HER2- → endocrine ± chemo per genomic recurrence score; Luminal B-like HER2+ → endocrine+chemo+anti-HER2; HER2-overexpressing → chemo+anti-HER2; Triple-negative → chemotherapy.","Germline BRCA testing indicated for: diagnosis age <50, Jewish ancestry, male breast cancer, triple-negative or multiple primary breast cancers, ≥1 first-degree relative with ovarian/prostate/pancreatic cancer, or ≥3 relatives (including patient) with breast and/or prostate cancer.","Genomic assays (21-gene Oncotype Dx, 70-gene MammaPrint) assist adjuvant chemotherapy decisions in HR+ disease."],"regimens":[{"approach":"Selected by intrinsic molecular subtype","evidence":"cited: monarchE, OlympiA, KEYNOTE-522-type data","line":"Neoadjuvant / early-stage systemic therapy","regimen":"Endocrine therapy (Luminal A); +/- chemo per genomic recurrence score (Luminal B, HER2-); chemo + anti-HER2 (HER2+ subtypes); chemotherapy +/- immunotherapy in high-risk triple-negative disease (e.g. neoadjuvant pembrolizumab); additional options: abemaciclib (CDK4/6i, HR+ high-risk), olaparib (PARP inhibitor, germline-BRCA-mutated with residual disease post-neoadjuvant therapy)"},{"approach":"Chemo +/- immunotherapy, or platinum if BRCA-mutated","evidence":"KEYNOTE-355; TNT trial","line":"First-line, metastatic triple-negative","regimen":"Pembrolizumab + chemotherapy (nab-paclitaxel/paclitaxel/carboplatin+gemcitabine) if PD-L1 CPS>=10; carboplatin preferred over docetaxel in BRCA-mutated/triple-negative disease"},{"approach":"Sequential chemotherapy / targeted agents","evidence":"EMBRACE, OlympiAD, EMBRACA, ASCENT (as cited)","line":"Second-line or later, metastatic triple-negative","regimen":"Eribulin; PARP inhibitors (olaparib, talazoparib) if germline BRCA-mutated; sacituzumab govitecan (anti-Trop2 antibody-drug conjugate)"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Breast Cancer chapter","version":"1st ed."},"stage_badges":["Tis","I","II","III","IV"],"staging":["AJCC TNM Staging System, 8th edition.","T: tumor size/local extent (Tis = DCIS/Paget disease without invasion; LCIS removed from TNM staging in the 8th edition).","N: pN0–N3 by number and location of involved nodes (including sentinel-node micro/macrometastases).","M: M0/M1 — overall stage groups derived from the TNM combination per the AJCC 8th-edition tables."],"status":"ready","th":"มะเร็งเต้านม","toxicity_monitoring":["Not reported in the source beyond agent selection by subtype."],"treatment_overview":[{"heading":"Early-Stage Disease","items":["Local therapy (mastectomy or breast-conserving surgery plus axillary/sentinel node surgery) ± radiotherapy, plus systemic therapy selected by molecular subtype.","Neoadjuvant systemic therapy is increasingly preferred for tumors >T2 and/or axillary nodal involvement, or when breast-conserving surgery is not initially feasible."],"tone":"accent"},{"heading":"Metastatic / Recurrent Disease","items":["Re-biopsy is recommended to reconfirm intrinsic subtype before selecting therapy."],"tone":"rose"}]},"cervical-cancer":{"clinical_presentation":["Early-stage disease is often asymptomatic and detected by screening.","Advanced disease presents with abnormal vaginal bleeding, post-coital pain, abnormal discharge, or pelvic pain.","Local extension can cause hematuria or rectal bleeding via fistula formation."],"en":"Cervical Cancer","epidemiology":["HPV infection, especially types 16 and 18, is the principal cause, acting via the E6 and E7 oncoproteins.","HPV vaccination is the key primary prevention measure.","Pap smear screening reduces incidence and mortality but has only about 50% sensitivity; HPV DNA testing is more sensitive (approximately 60-70%) and is now the preferred screening approach."],"follow_up":["Not reported in the source."],"pathology":["Squamous cell carcinoma is the most common histology (70-80%), followed by adenocarcinoma (20-25%).","Cone biopsy provides the tissue diagnosis (gold standard).","Pelvic MRI is preferred over CT for local staging and has replaced cystoscopy/proctoscopy for assessing local extension.","PD-L1 and MSI testing are considered in stage IV disease to help select immunotherapy."],"regimens":[{"approach":"Concurrent chemoradiation","evidence":"Standard of care for locally advanced disease","line":"Locally advanced (stage IIB and above)","regimen":"Platinum-based chemotherapy with concurrent radiation"},{"approach":"Neoadjuvant chemotherapy","evidence":"Alternative treatment sequence","line":"Locally advanced, alternative sequencing","regimen":"Neoadjuvant chemotherapy followed by surgery or radiation"},{"approach":"Palliative chemotherapy","evidence":"Standard palliative backbone","line":"Recurrent or metastatic","regimen":"Platinum plus paclitaxel (cisplatin/paclitaxel or carboplatin/paclitaxel)"},{"approach":"Chemotherapy plus anti-angiogenic therapy","evidence":"GOG-240 — improved survival","line":"Recurrent or metastatic","regimen":"Chemotherapy plus bevacizumab"},{"approach":"Chemotherapy plus immunotherapy, ± anti-angiogenic therapy","evidence":"KEYNOTE-826, for PD-L1 combined-positive-score-positive tumors","line":"Recurrent or metastatic, PD-L1 positive","regimen":"Chemotherapy (± bevacizumab) plus pembrolizumab"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Cervical Cancer chapter","version":"1st ed."},"stage_badges":["I","II","III","IV"],"staging":["FIGO staging system."],"status":"ready","th":"มะเร็งปากมดลูก","toxicity_monitoring":["Not reported in the source."],"treatment_overview":[{"heading":"Early-Stage Disease","items":["Hysterectomy is the primary treatment; fertility-sparing options (trachelectomy or local excision) can be considered for appropriate stage I candidates.","Post-operative stage IA2 and above: adjuvant radiation or concurrent chemoradiation is considered, especially with high-risk features such as nodal metastasis or parametrial invasion."],"tone":"accent"},{"heading":"Locally Advanced Disease","items":["Stage IIB and above is generally not a surgical candidate — concurrent chemoradiation, or neoadjuvant chemotherapy followed by surgery or radiation, is standard."],"tone":"amber"},{"heading":"Recurrent / Metastatic Disease","items":["Palliative chemotherapy, with targeted therapy or immunotherapy added based on biomarker status."],"tone":"rose"}]},"cns-tumor":{"clinical_presentation":["Headache (worse with positional change, cough, sneezing, or straining), focal seizures, focal neurologic deficits depending on tumor location.","Cognitive dysfunction, memory loss, and personality/mood change.","Large tumors obstructing CSF flow cause hydrocephalus — headache, vomiting, diplopia, papilledema.","Dominant temporal lobe involvement: language comprehension deficits, behavioral change, memory loss, hearing/emotion problems.","Dominant parietal lobe involvement: Gerstmann syndrome (right-left confusion, agraphia, finger agnosia, acalculia)."],"en":"Primary Brain Tumor (CNS Tumor)","epidemiology":["Not quantified in the source."],"follow_up":["MRI brain at 4 weeks post-radiotherapy, then every 2-4 months for 3 years, then every 6 months thereafter."],"pathology":["MRI brain with contrast is the diagnostic gold standard; tissue is needed for histologic grading and molecular testing.","High-grade glioma: T1-hypointense with heterogeneous post-contrast enhancement and vasogenic edema; glioblastoma classically shows thick rim enhancement with a non-enhancing necrotic center.","IDH1/IDH2 mutation — favorable prognostic marker, associated with MGMT promoter methylation.","1p/19q co-deletion — diagnostic for oligodendroglioma, favorable prognosis, predicts alkylating-agent response.","MGMT promoter methylation — predicts better response to temozolomide."],"regimens":[{"approach":"Concurrent chemoradiation, then adjuvant chemo +/- TTFields","evidence":"Stupp protocol (EORTC/NCIC trial); EF-14 trial (TTFields)","line":"First-line, age 18-70, good performance status","regimen":"Radiotherapy (60Gy) + concurrent temozolomide 75mg/m2/day x42-49 days, then adjuvant temozolomide 150-200mg/m2/day x5 days per 28-day cycle x6 cycles; add tumor-treating fields (TTFields) to adjuvant temozolomide if available"},{"approach":"Hypofractionated chemoradiation","evidence":"Nordic trial; Perry et al. NEJM 2017","line":"Age >70, good performance status","regimen":"Hypofractionated brain RT with concurrent and adjuvant temozolomide"},{"approach":"Individualized","evidence":"–","line":"Recurrence","regimen":"Repeat surgery, re-irradiation, or systemic therapy: bevacizumab, temozolomide re-challenge, lomustine/carmustine, PCV, regorafenib; checkpoint inhibitors mainly in mismatch-repair-deficient tumors"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Primary Brain Tumor chapter","version":"1st ed."},"staging":["Graded by WHO CNS tumor grade (e.g. the case: Glioblastoma, WHO grade 4, IDH-wildtype) rather than a TNM system."],"status":"ready","th":"เนื้องอกสมองปฐมภูมิ","toxicity_monitoring":["Corticosteroids are used only for symptomatic edema, started ≥24 hours before radiotherapy.","Anti-seizure prophylaxis is not recommended without a seizure history; if seizures occur, use non-enzyme-inducing antiepileptics.","Depression and anxiety are common in patients and families and warrant active monitoring."],"treatment_overview":[{"heading":"Surgery","items":["Maximal safe surgical resection is foundational."],"tone":"accent"},{"heading":"Glioblastoma, Age 18-70, Good Performance Status","items":["Concurrent radiotherapy + temozolomide, then adjuvant temozolomide (Stupp protocol); adding tumor-treating fields (TTFields) to adjuvant temozolomide further improves survival."],"tone":"amber"},{"heading":"Age >70, Good Performance Status","items":["Hypofractionated radiotherapy with concurrent/adjuvant temozolomide, especially with MGMT methylation."],"tone":"amber"},{"heading":"Poor Performance Status","items":["Hypofractionated RT or temozolomide alone (if MGMT-methylated), or supportive care."],"tone":"rose"},{"heading":"Recurrence","items":["Repeat surgery, re-irradiation, or systemic therapy; checkpoint inhibitors generally show poor response except in the rare mismatch-repair-deficient subset."],"tone":"rose"}]},"colorectal-cancer":{"clinical_presentation":["Left-sided colon cancer: bowel obstruction, abdominal pain, lower GI bleeding.","Right-sided (ascending) colon cancer: anemia from chronic occult blood loss, or lower GI bleeding.","Screening modalities: colonoscopy (q10y), flexible sigmoidoscopy (q5-10y), CT colonography (q5y), guaiac FOBT (annual), FIT (annual), multi-target stool DNA (q3y).","Serum CEA is not recommended as a screening test."],"en":"Colorectal Cancer","epidemiology":["Average-risk screening begins at age 45.","First-degree relative with colorectal cancer: start at 40, or 10 years before the relative's diagnosis age; repeat q5y (colonoscopy only).","Inflammatory bowel disease: start 8 years after diagnosis; repeat q1-3y by severity.","Familial adenomatous polyposis: start age 10-15; annual colonoscopy.","Lynch, Peutz-Jeghers, or Li-Fraumeni syndrome also warrant colonoscopy-only screening.","Other risk factors: advancing age, acromegaly, renal transplantation, obesity, diabetes, processed/red meat intake, sedentary lifestyle, smoking, alcohol."],"follow_up":["Surveillance with history/exam, serum CEA, CT scan, and colonoscopy on a defined schedule.","No universally agreed CEA cutoff for recurrence (range 5-15 ng/mL); further workup suggested if CEA ≥5 ng/mL and rising, with PET-CT if that is negative.","Five-year survival ranges 20-80% depending on nodal status, local tumor extent, and other clinicopathologic features."],"pathology":["Adenocarcinoma confirmed by colonoscopic biopsy.","dMMR/MSI-H: favorable prognostic marker in stage II disease, may support omitting adjuvant chemo there, and predicts immunotherapy benefit in metastatic disease.","In metastatic disease, test MMR/MSI status, RAS-BRAF, and HER2 to select targeted therapy."],"regimens":[{"approach":"Post-surgical chemotherapy","evidence":"standard of care per source","line":"Adjuvant, Stage III","regimen":"Oxaliplatin + fluoropyrimidine (CAPEOX or FOLFOX) x 6 months"},{"approach":"Post-surgical chemotherapy","evidence":"–","line":"Adjuvant, Stage II (high-risk)","regimen":"Fluoropyrimidine (capecitabine or 5-FU/LV) x 6 months, +/- oxaliplatin per institutional practice; consider omitting if dMMR/MSI-H"},{"approach":"Chosen by resectability and biomarkers (MMR/MSI, RAS-BRAF, HER2)","evidence":"–","line":"Metastatic, first-line","regimen":"Fluoropyrimidine + oxaliplatin and/or irinotecan +/- anti-VEGF (bevacizumab) or anti-EGFR (cetuximab/panitumumab, if all-RAS/BRAF wild-type and left-sided); single-agent immunotherapy if dMMR/MSI-H"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Colon Cancer chapter","version":"1st ed."},"stage_badges":["I","II","III","IV"],"staging":["Stage I: T1-2N0.","Stage II: T3-4N0 — 'high-risk features' are poorly differentiated histology, lymphatic/vascular invasion, bowel obstruction, <12 lymph nodes examined, perineural invasion, perforation, positive margins, high-tier tumor budding.","Stage III: any T with N1-2 nodal involvement.","Stage IV: distant metastasis — liver-only disease in 30-35% of metastatic cases."],"status":"ready","th":"มะเร็งลำไส้ใหญ่","toxicity_monitoring":["Bevacizumab: monitor for arterial/venous thromboembolism, severe bleeding, hypertension, proteinuria, and impaired wound healing.","Fluoropyrimidines: watch for drug-drug interactions (e.g. warfarin, allopurinol)."],"treatment_overview":[{"heading":"Non-Metastatic Disease (Stage I-III)","items":["Non-metastatic (M0) disease is treated with curative intent.","Stage I: surgery alone.","Stage II: surgery ± adjuvant fluoropyrimidine x6 months if high-risk features present; dMMR/MSI-H supports omitting chemotherapy.","Stage III: surgery followed by adjuvant oxaliplatin + fluoropyrimidine x6 months (oxaliplatin benefit less clear >70y).","Radiotherapy is not routinely used in colon cancer, unlike rectal cancer."],"tone":"accent"},{"heading":"Metastatic Disease","items":["Triaged by a multidisciplinary team into clearly resectable, potentially resectable, and unresectable groups (see Treatment table)."],"tone":"rose"}]},"cup":{"clinical_presentation":["Presentation depends on the site(s) of metastatic involvement at diagnosis, found after a thorough workup fails to identify a primary tumor site (source case: abdominal pain/fullness from liver and intra-abdominal nodal metastases)."],"en":"Cancer of Unknown Primary","epidemiology":["Favorable-subset CUP accounts for ~10-20% of CUP cases; the remainder is unfavorable-subset CUP with a poorer prognosis and less standardized treatment."],"follow_up":["Not reported in the source."],"pathology":["Workup: complete history and physical (including skin exam and digital rectal exam; breast/pelvic exam in women), baseline labs (CBC, BUN, creatinine, electrolytes, calcium, LFTs, LDH), CT chest/abdomen/pelvis, and tissue pathology with IHC to help identify the likely primary.","Selected tumor markers help in specific patterns: elevated AFP/beta-hCG in a midline mass in a man <50y suggests germ cell tumor; elevated PSA in a man >40y with adenocarcinoma and blastic bone metastases suggests prostate cancer.","Small round cell neoplasm differential: multiple myeloma (often CRAB features), rhabdomyosarcoma (usually pediatric), melanoma (may have a primary skin lesion), small cell lung carcinoma (lung/thoracic nodal mass), lymphoma (multi-site lymphadenopathy ± B symptoms), germ cell tumor (midline ± testicular mass in men), Ewing sarcoma (usually a primary bone lesion), neuroendocrine tumor (often GI/pancreatic primary), neuroblastoma (usually pediatric)."],"regimens":[{"approach":"Treated as ovarian cancer","evidence":"–","line":"Favorable — peritoneal papillary adenocarcinoma (women)","regimen":"Debulking surgery + platinum/taxane chemotherapy (as stage III ovarian cancer)"},{"approach":"Treated as breast cancer","evidence":"–","line":"Favorable — axillary nodal adenocarcinoma (women)","regimen":"Mastectomy with axillary lymphadenectomy, then chemotherapy, radiotherapy, and anti-HER2/hormonal therapy as indicated (as stage II-III breast cancer)"},{"approach":"Treated as poor-risk germ cell tumor","evidence":"–","line":"Favorable — midline poorly-differentiated carcinoma (men)","regimen":"Platinum-based chemotherapy"},{"approach":"Chemotherapy","evidence":"–","line":"Favorable — poorly-differentiated neuroendocrine carcinoma","regimen":"Platinum + etoposide"},{"approach":"Locoregional therapy","evidence":"–","line":"Favorable — squamous cell carcinoma, cervical nodes","regimen":"Neck dissection with concurrent chemoradiation"},{"approach":"Treated as colorectal cancer","evidence":"–","line":"Favorable — colon-cancer immunophenotype (CK20+, CK7-, CDX2+)","regimen":"Fluoropyrimidine + oxaliplatin/irinotecan (as stage IV colorectal cancer)"},{"approach":"Treated as prostate cancer","evidence":"–","line":"Favorable — blastic bone mets + elevated PSA (men)","regimen":"Androgen deprivation therapy (as metastatic hormone-sensitive prostate cancer)"},{"approach":"Local therapy","evidence":"–","line":"Favorable — isolated inguinal nodes (SCC), or one small resectable tumor","regimen":"Complete surgical excision or radiotherapy; chemotherapy considered"},{"approach":"Empiric or biomarker-directed","evidence":"CUPISCO trial (genomic-profiling-directed therapy)","line":"Unfavorable-subset CUP","regimen":"Empiric platinum-based chemotherapy; or tumor-agnostic therapy if MSI-H/TMB-H (pembrolizumab/dostarlimab), NTRK fusion (entrectinib/larotrectinib), or BRAF V600-mutant (dabrafenib+trametinib)"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Cancer of Unknown Primary chapter","version":"1st ed."},"staging":["Not a formal TNM system — CUP is classified into favorable vs. unfavorable prognostic subsets by clinicopathologic pattern, which then dictates treatment approach."],"status":"ready","th":"มะเร็งไม่ทราบตำแหน่งปฐมภูมิ","toxicity_monitoring":["Not reported in the source."],"treatment_overview":[{"heading":"Favorable-Subset CUP","items":["Treated per the standard protocol for the cancer type it clinically resembles (see Treatment table for site-specific patterns)."],"tone":"accent"},{"heading":"Unfavorable-Subset CUP","items":["No favorable pattern identified: empiric platinum-based chemotherapy is standard.","Tumor-agnostic biomarker-directed therapy is an emerging option, limited by the cost and low yield of genomic profiling."],"tone":"rose"}]},"esophageal-cancer":{"clinical_presentation":["Progressive dysphagia with weight loss is the classic presentation.","Iron deficiency anemia, chronic cough, epigastric pain can occur.","Hoarseness from recurrent laryngeal nerve involvement, or bone pain if metastatic disease is present.","Physical exam may be unremarkable, or reveal lymphadenopathy or hepatomegaly."],"en":"Esophageal Cancer","epidemiology":["Smoking and alcohol use are major risk factors for squamous cell carcinoma.","High body mass index and Barrett's esophagus are the major risk factors for adenocarcinoma; smoking is only a moderate risk factor for this subtype.","Population incidence/prevalence figures are not reported in the source."],"follow_up":["Not reported in the source."],"pathology":["Two main histologic subtypes: squamous cell carcinoma and adenocarcinoma.","Endoscopy with biopsy is diagnostic, assessing tumor location, extent, and obtaining tissue for pathology.","CT chest and abdomen evaluates lung and liver metastasis well, and can detect peritoneal metastasis, aortic involvement, or tracheobronchial invasion."],"regimens":[{"approach":"Chemotherapy backbone","evidence":"Standard systemic backbone","line":"Metastatic, first line","regimen":"Fluoropyrimidine-based regimen with cisplatin or oxaliplatin"},{"approach":"Chemotherapy","evidence":"Used after progression on fluoropyrimidine-based therapy","line":"Metastatic, second line","regimen":"Docetaxel or paclitaxel"},{"approach":"Checkpoint inhibitor","evidence":"Newer treatment approach for esophageal cancer","line":"Metastatic, immunotherapy","regimen":"Nivolumab or pembrolizumab combined with chemotherapy; or nivolumab plus ipilimumab"},{"approach":"Anti-HER2 therapy","evidence":"Adenocarcinoma subtype only","line":"Metastatic, HER2-overexpressing adenocarcinoma","regimen":"Added to the chemotherapy backbone when HER2 overexpression is confirmed"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Esophageal Cancer chapter","version":"1st ed."},"stage_badges":["I","II","III","IV"],"staging":["AJCC TNM Staging System, 8th edition (2017), with separate stage-grouping tables for squamous cell carcinoma vs. adenocarcinoma.","Tumor location is classified as upper (cervical esophagus to lower border of azygos vein), middle, or lower (to gastroesophageal junction)."],"status":"ready","th":"มะเร็งหลอดอาหาร","toxicity_monitoring":["Dysphagia frequently leads to malnutrition; radiation and chemotherapy can further worsen oral intake.","Nutritional status should be assessed at every visit; feeding tube placement or metal stent insertion is considered for significant obstruction or intake failure."],"treatment_overview":[{"heading":"Premalignant / T1 Disease","items":["Surveillance, ablative therapy (photodynamic therapy, laser ablation), endoscopic mucosal resection, or minimally invasive esophagectomy."],"tone":"accent"},{"heading":"Localized Disease","items":["Surgery alone (transhiatal or transthoracic esophagectomy) or preoperative chemoradiation followed by surgery, or definitive chemoradiation, depending on tumor location and patient fitness."],"tone":"accent"},{"heading":"Locally Advanced Disease","items":["Chemoradiation if the patient is fit; radiation alone or palliative care if unfit for chemoradiation."],"tone":"amber"},{"heading":"Metastatic Disease","items":["Systemic therapy — squamous cell carcinoma uses chemotherapy plus immunotherapy; adenocarcinoma adds anti-HER2 therapy when HER2 overexpression is confirmed."],"tone":"rose"}]},"gastric-cancer":{"clinical_presentation":["Early symptoms are nonspecific: indigestion, post-prandial bloating, epigastric burning pain, decreased appetite, early mild weight loss.","Advanced disease: GI bleeding (melena), fatigue from anemia, worsening pain including nocturnal pain, vomiting, marked weight loss, ascites."],"en":"Gastric (Stomach) Cancer","epidemiology":["Hereditary causes account for a minority (3-5%) of cases: Hereditary Diffuse Gastric Adenocarcinoma (CDH1 germline mutation, diffuse-type), Lynch syndrome/HNPCC (DNA mismatch-repair gene mutation, intestinal-type), Juvenile Polyposis Syndrome (SMAD4/BMPR1A), Peutz-Jeghers Syndrome (STK11/LKB1), Familial Adenomatous Polyposis (APC), and Gastric Adenocarcinoma and Proximal Polyposis of the Stomach (APC promoter 1B).","Environmental/behavioral factors dominate overall risk: Helicobacter pylori infection, smoking, heavy alcohol use, high salt intake, and grilled or fermented foods — especially in high-incidence East Asian countries (Japan, Korea, China).","In Western countries, diffuse-type cardia cancer is more associated with obesity, gastroesophageal reflux, and Barrett's esophagus."],"follow_up":["Not reported in the source."],"pathology":["Adenocarcinoma is the predominant histology.","Esophagogastroduodenoscopy (EGD) with biopsy is the best diagnostic method.","When diagnosed via nodal or ascitic fluid cytology rather than direct biopsy, immunohistochemistry showing CK20-positive with variable CK7/CDX2 supports a gastric primary."],"regimens":[{"approach":"Perioperative chemotherapy","evidence":"First-line recommendation; reserved for good performance status given higher toxicity","line":"Perioperative, preferred","regimen":"FLOT (5-FU/leucovorin/oxaliplatin/docetaxel), 4 cycles pre-operatively and 4 post-operatively"},{"approach":"Perioperative chemotherapy","evidence":"For moderate performance status","line":"Perioperative, alternative","regimen":"FOLFOX, or fluorouracil plus cisplatin, 4 cycles pre-operatively and 4 post-operatively"},{"approach":"Post-operative chemotherapy","evidence":"For D2 dissection without prior neoadjuvant therapy","line":"Adjuvant only, D2 dissection","regimen":"S-1, or capecitabine plus oxaliplatin, or 5-FU plus oxaliplatin"},{"approach":"Post-operative concurrent chemoradiation","evidence":"For D1 dissection","line":"Adjuvant only, D1 dissection","regimen":"Fluoropyrimidine-based chemotherapy with concurrent radiation"},{"approach":"Chemotherapy","evidence":"Standard first-line options","line":"Metastatic, first line","regimen":"Cisplatin+5FU, FOLFOX, cisplatin+capecitabine, or CAPOX; triplet regimens (DCF, ECF) reserved for excellent performance status"},{"approach":"Anti-HER2 targeted therapy","evidence":"ToGA trial; KEYNOTE-811 for the triplet","line":"Metastatic, first line, HER2-overexpressing","regimen":"Trastuzumab plus chemotherapy (± pembrolizumab)"},{"approach":"Immunotherapy plus chemotherapy","evidence":"CheckMate-649","line":"Metastatic, first line, PD-L1 CPS≥5","regimen":"Nivolumab plus fluoropyrimidine/platinum chemotherapy"},{"approach":"Chemotherapy, targeted therapy, or antibody-drug conjugate","evidence":"RAINBOW, REGARD, DESTINY-Gastric01 trials","line":"Metastatic, second line and beyond","regimen":"Docetaxel, paclitaxel, irinotecan, FOLFIRI; ramucirumab alone or with paclitaxel; fam-trastuzumab deruxtecan (HER2+, ≥2 prior lines including trastuzumab); TAS-102 (third line and beyond)"},{"approach":"Tumor-agnostic targeted therapy","evidence":"FDA-approved biomarker-based options","line":"Metastatic, biomarker-directed","regimen":"Pembrolizumab or dostarlimab (MSI-H/dMMR, or high TMB); entrectinib or larotrectinib (NTRK fusion); dabrafenib plus trametinib (BRAF V600E); selpercatinib (RET fusion)"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Stomach Cancer chapter","version":"1st ed."},"stage_badges":["0","I","II","III","IV"],"staging":["AJCC TNM Staging System, 8th edition (2017), spanning Stage 0 (Tis) through Stage IV.","At least 15 lymph nodes should be examined; nodal dissection extent is classified as D1 (perigastric), D2 (perigastric plus along major vessels), or D3 (D2 plus para-aortic region)."],"status":"ready","th":"มะเร็งกระเพาะอาหาร","toxicity_monitoring":["Not detailed in the source beyond noting FLOT carries a higher risk of severe toxicity, so it is reserved for patients with good performance status."],"treatment_overview":[{"heading":"Surgical Management","items":["Surgery (total or subtotal gastrectomy, aiming for a margin ≥4 cm) with D2 lymphadenectomy is the surgical standard."],"tone":"accent"},{"heading":"Adjuvant / Perioperative Therapy","items":["Adjuvant therapy is indicated for node-positive disease, pT3/pT4 tumors, or pT2 tumors with high-risk features (poorly differentiated/high grade, lymphovascular or perineural invasion, age <50, or D1 dissection).","Perioperative chemotherapy is considered for cT2 or higher tumors."],"tone":"amber"},{"heading":"Metastatic Disease","items":["Treated with a chemotherapy backbone, adding targeted therapy or immunotherapy based on biomarker testing (HER2, PD-L1 CPS, MSI/dMMR, TMB, NTRK, BRAF V600E, RET)."],"tone":"rose"}]},"germ-cell-tumor":{"clinical_presentation":["Arises along the midline path of embryonic primordial germ cell migration: gonadal (testicular, ovarian) vs. extragonadal (pineal gland, mediastinum, retroperitoneum).","Mediastinal presentation: cough, chest pain, dyspnea, anterior chest wall bulging from a large mass.","Choriocarcinoma may cause gynecomastia and testicular atrophy."],"en":"Germ Cell Tumor","epidemiology":["Not quantified in the source. The case example is a 16-year-old male with a mediastinal (extragonadal) germ cell tumor."],"follow_up":["Surveillance CT scan after resection of residual disease that proves to be fibrosis or teratoma."],"pathology":["Classified as seminoma (dysgerminoma in females) or non-seminomatous germ cell tumor (NSGCT).","Beta-hCG: markedly elevated in pure choriocarcinoma, also elevated in embryonal carcinoma, mildly elevated in pure seminoma.","AFP: elevated in embryonal carcinoma and yolk sac tumor, not in pure seminoma or pure choriocarcinoma."],"regimens":[{"approach":"Standard chemotherapy","evidence":"–","line":"Good prognosis","regimen":"BEP (bleomycin, etoposide, cisplatin) x3 cycles; or EP (etoposide, cisplatin) x4 cycles if bleomycin pulmonary toxicity risk (e.g. older patients)"},{"approach":"Standard chemotherapy","evidence":"–","line":"Intermediate/poor prognosis (stage IIIB/IIIC)","regimen":"BEP x4 cycles; VIP (ifosfamide, etoposide, cisplatin) as an alternative if bleomycin is contraindicated"},{"approach":"Additional chemotherapy","evidence":"–","line":"Residual disease post-chemo, carcinoma on pathology","regimen":"2 additional cycles of EP"},{"approach":"Salvage chemotherapy","evidence":"–","line":"Salvage (refractory/relapsed)","regimen":"Cisplatin + ifosfamide + vinblastine or paclitaxel, +/- peripheral blood stem cell transplant; or 4 cycles cisplatin/ifosfamide followed by a triplet regimen"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Germ Cell Tumor chapter","version":"1st ed."},"stage_badges":["0","I","II","III"],"staging":["TNM staging as in other cancers, but disease is staged 0-III only (not 0-IV) given the high curability with chemotherapy.","Serum tumor marker levels are incorporated into staging.","Stage III is further risk-stratified (good/intermediate/poor prognosis) to guide chemotherapy intensity and predict survival."],"status":"ready","th":"เนื้องอกเซลล์สืบพันธุ์","toxicity_monitoring":["Choice between BEP and EP/VIP-based regimens weighs bleomycin pulmonary toxicity risk (e.g. older age, smoking history, chronic lung disease)."],"treatment_overview":[{"heading":"Seminoma","items":["Mediastinal seminoma: resection of bulky disease + radiotherapy (or chemotherapy first if unresectable, then resection of residual tumor); 5-year survival >80%."],"tone":"accent"},{"heading":"Non-Seminomatous GCT (NSGCT)","items":["More aggressive and rapidly progressive; surgery mainly for diagnostic tissue; primary treatment is histology-directed chemotherapy followed by resection of residual tumor.","Residual disease after chemotherapy is resected: fibrosis/teratoma → surveillance; carcinoma → 2 more cycles of EP."],"tone":"amber"},{"heading":"Refractory / Relapsed Disease","items":["Salvage chemotherapy ± stem cell transplant."],"tone":"rose"}]},"gist":{"clinical_presentation":["Overt or occult GI bleeding, abdominal pain, or bowel obstruction are common presentations.","GIST most commonly metastasizes to the liver and peritoneum.","Small tumors are often asymptomatic and found incidentally on imaging or during surgery."],"en":"Gastrointestinal Stromal Tumor (GIST)","epidemiology":["Pediatric/young-adult GIST can be associated with Carney-Stratakis syndrome (GIST plus paraganglioma), Carney triad (GIST, paraganglioma, and pulmonary chondroma), or neurofibromatosis type 1."],"follow_up":["Recurrence is most common within the first 2 years after resection, with about 50% of recurrences occurring intra-abdominally; a detailed surveillance schedule is not reported in the source."],"pathology":["CT shows a solid, smoothly-contoured mass; tumors over 15cm may show necrosis or hemorrhage, typically without lymph-node spread.","MRI is preferred for rectal GIST to plan surgery.","Upper endoscopy shows a submucosal mass with normal overlying mucosa; endoscopic ultrasound shows a hypoechoic, well-circumscribed mass within the muscle layer.","Biopsy carries a risk of tumor seeding or rupture — endoscopic transmural biopsy is preferred over percutaneous transperitoneal biopsy for this reason.","Immunohistochemistry is diagnostic: CD117 positive, CD34 positive, S100 negative, on a background of spindle-cell histology."],"regimens":[{"approach":"Tyrosine kinase inhibitor","evidence":"PERSIST-5 trial; for imatinib-sensitive mutations","line":"Adjuvant, intermediate/high-risk resected disease","regimen":"Imatinib 400mg/day for 5 years"},{"approach":"Tyrosine kinase inhibitor","evidence":"Reassess resectability at 6 months or more","line":"Neoadjuvant, unresectable at diagnosis","regimen":"Imatinib (KIT or PDGFRA mutation, excluding D842V); Avapritinib (PDGFRA exon 18 D842V)"},{"approach":"Tyrosine kinase inhibitor","evidence":"Mutation-guided dosing","line":"Metastatic, first line","regimen":"Imatinib 400mg/day (KIT exon 11 mutation); Imatinib 800mg/day (KIT exon 9 mutation)"},{"approach":"Tyrosine kinase inhibitor","evidence":"First-line choice for this specific mutation","line":"Metastatic, PDGFRA D842V mutation","regimen":"Avapritinib"},{"approach":"Sequential tyrosine kinase inhibitors","evidence":"Sequential lines after imatinib resistance","line":"Metastatic, after imatinib failure","regimen":"Sunitinib, then regorafenib, then ripretinib"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — GIST chapter","version":"1st ed."},"stage_badges":["I","II","IIIA","IIIB","IV"],"staging":["AJCC Staging System, 8th edition (2017), with separate tables for gastric GIST vs. intestinal/other-site GIST, incorporating tumor size, mitotic rate (low ≤5/50 HPF vs. high >5/50 HPF), and nodal/distant metastasis."],"status":"ready","th":"เนื้องอกมะเร็งเนื้อเยื่อเกี่ยวพันทางเดินอาหาร (GIST)","toxicity_monitoring":["Not reported in the source."],"treatment_overview":[{"heading":"Resectable Disease","items":["Primary treatment is surgical resection with negative margins, taking care to avoid intraoperative tumor rupture.","Adjuvant imatinib 400mg for 5 years is used for intermediate/high-risk resected disease with an imatinib-sensitive mutation (tumor >2cm with mitotic rate >5/50 HPF, or non-gastric primary >5cm)."],"tone":"accent"},{"heading":"Unresectable at Diagnosis","items":["Mutation testing guides neoadjuvant therapy — imatinib for KIT or PDGFRA mutations (excluding PDGFRA exon 18 D842V), or avapritinib specifically for PDGFRA D842V — with resectability reassessed after at least 6 months; imatinib is continued post-operatively if resection is achieved."],"tone":"amber"},{"heading":"Recurrent / Metastatic Disease","items":["Single-site resectable recurrence carries a good prognosis with surgery; multi-organ unresectable disease is treated with lifelong tyrosine kinase inhibitor therapy guided by mutation analysis."],"tone":"rose"}]},"hcc":{"clinical_presentation":["May be asymptomatic, or present with signs of cirrhosis (jaundice, ascites, variceal upper-GI bleeding).","Advanced disease may present with symptoms from extrahepatic metastasis (most common sites: lung, intra-abdominal lymph nodes, bone) — cough, dyspnea, or bone pain.","Rarely presents with paraneoplastic syndromes (hypercalcemia, hypoglycemia, erythrocytosis)."],"en":"Hepatocellular Carcinoma","epidemiology":["The single most important risk factor is chronic viral hepatitis (hepatitis B and C).","Other risk factors: aflatoxin B1 exposure (food contamination), alcohol use, smoking, and NAFLD associated with diabetes and obesity."],"follow_up":["Not detailed beyond BCLC-stage-driven reassessment (e.g. restaging CT after TACE)."],"pathology":["Can be diagnosed radiologically without biopsy when a liver lesion >1cm shows a typical pattern on multiphasic contrast CT/MRI — arterial-phase hyperenhancement with washout on portal-venous/delayed phase — in a cirrhotic patient.","In non-cirrhotic patients, pathological confirmation is recommended since imaging specificity is lower.","Serum AFP is not recommended for screening or diagnosis, owing to poor sensitivity/specificity."],"regimens":[{"approach":"Chosen by Child-Pugh class and comorbidities","evidence":"–","line":"First-line systemic (advanced, BCLC C)","regimen":"Atezolizumab + bevacizumab (Child-Pugh A only); tremelimumab + durvalumab; oral multikinase inhibitors (sorafenib, lenvatinib); single-agent immunotherapy (durvalumab, nivolumab)"},{"approach":"After prior first-line therapy","evidence":"–","line":"Subsequent-line systemic","regimen":"Oral multikinase inhibitors after prior sorafenib — regorafenib, cabozantinib, ramucirumab (if AFP>400) — in Child-Pugh A; immunotherapy: nivolumab+ipilimumab or pembrolizumab (Child-Pugh A only), nivolumab (Child-Pugh B only)"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Hepatocellular Carcinoma chapter","version":"1st ed."},"stage_badges":["BCLC 0/A","BCLC B","BCLC C","BCLC D"],"staging":["Barcelona Clinic Liver Cancer (BCLC) staging is the most widely used system.","It integrates tumor burden, hepatic reserve (Child-Pugh class), and performance status, and directly guides treatment selection."],"status":"ready","th":"มะเร็งตับ","toxicity_monitoring":["Not detailed beyond Child-Pugh-based eligibility restrictions for specific regimens."],"treatment_overview":[{"heading":"Intermediate Stage (BCLC B)","items":["Trans-arterial chemoembolization (TACE) plus antiviral therapy if the cirrhosis is viral-hepatitis-related."],"tone":"amber"},{"heading":"Advanced Stage (BCLC C)","items":["Metastatic disease or portal vein invasion: systemic therapy, chosen by performance status, Child-Pugh class, comorbidities, and drug access."],"tone":"rose"},{"heading":"Terminal Stage (BCLC D)","items":["Child-Pugh C or ECOG PS 3-4 (median survival ~3 months): best supportive/palliative care."],"tone":"neutral"}]},"head-neck-cancer":{"clinical_presentation":["Oral cavity: oral pain.","Nasopharynx: hearing loss, nasal congestion, epistaxis, cranial neuropathy (e.g. diplopia).","Oropharynx (base of tongue, tonsil, tonsillar pillar): odynophagia.","Hypopharynx: sore throat, ear pain, voice change.","Larynx: neck mass and hoarseness.","Regional lymph node level correlates with the likely primary site (level I: oral cavity; level II: oral cavity/pharynx; level III: larynx/hypopharynx/thyroid; level IV: larynx/hypopharynx/thyroid/cervical esophagus/trachea; level V: nasopharynx/thyroid/paranasal sinus/posterior scalp; supraclavicular: infraclavicular primary)."],"en":"Head and Neck Cancer","epidemiology":["4th most common cancer in men and 10th in women (per source citation).","About 50% present with disease already spread at diagnosis (43% regional lymph nodes, 10% distant organs such as lung or bone).","Most common in men aged 50-70; oral cavity, larynx, and pharynx are the most frequent subsites, in that order.","Major risk factors: smoking (6-fold increased risk), alcohol; HPV is the main cause in non-smokers/non-drinkers with oral/oropharyngeal cancer; EBV is the main cause of nasopharyngeal carcinoma in non-smokers/non-drinkers."],"follow_up":["Not detailed beyond the supportive-care surveillance described above."],"pathology":[">90% squamous cell carcinoma, graded well/moderately/poorly differentiated by degree of mucosal keratinization."],"regimens":[{"approach":"Radiosensitizing chemotherapy","evidence":"–","line":"Concurrent with radiotherapy","regimen":"High-dose cisplatin 100mg/m2 q3weeks, or weekly cisplatin 40mg/m2, or weekly carboplatin AUC 1.5-2, or weekly cetuximab (400mg/m2 loading then 250mg/m2 weekly)"},{"approach":"Induction chemotherapy","evidence":"–","line":"Preoperative/induction","regimen":"TPF (docetaxel or paclitaxel + cisplatin + 5-FU) q3weeks; or CF (cisplatin + 5-FU) q3weeks"},{"approach":"Chemo-immunotherapy or chemo+targeted","evidence":"KEYNOTE-048","line":"Metastatic/recurrent, first-line","regimen":"Pembrolizumab + platinum + 5-FU; pembrolizumab alone if PD-L1 CPS>=1; Extreme regimen (cetuximab + platinum + 5-FU); CF; TC (paclitaxel + carboplatin)"},{"approach":"Sequential single agents","evidence":"CheckMate-141 (nivolumab)","line":"Metastatic/recurrent, second-line or later","regimen":"Nivolumab; pembrolizumab; cetuximab; paclitaxel; docetaxel; methotrexate"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Head and Neck Cancer chapter","version":"1st ed."},"stage_badges":["I","II","III","IVA","IVB","IVC"],"staging":["TNM staging as with other cancers.","Stage I (T1N0M0) and II (T2N0M0): 5-year survival >80%.","Stage III: T3N0M0, or T1-3N1M0.","Stage IVA: T4aN0-1M0 or T1-3N2M0.","Stage IVB: T4bN0-2M0 or any T N3M0.","Stage IVC: any T, any N, M1 — overall <40% survival for locally advanced/metastatic disease."],"status":"ready","th":"มะเร็งศีรษะและลำคอ","toxicity_monitoring":["Cisplatin: nephrotoxicity and ototoxicity — prevented with pre/post-hydration, electrolyte replacement, and high oral fluid intake.","Cetuximab: acneiform rash, mucositis, diarrhea.","Radiotherapy: mucositis (ice chips, oral hygiene, pre-treatment dental evaluation) and xerostomia (frequent oral rinsing, sialagogues, or mint/sour lozenges).","Nutritional support (consider pre-treatment gastrostomy tube) given high rates of malnutrition."],"treatment_overview":[{"heading":"Stage I-II","items":["Curative-intent primary tumor excision ± selective neck dissection, or radiotherapy if unfit for surgery; adjuvant RT or CCRT if adverse features."],"tone":"accent"},{"heading":"Stage III","items":["Primary tumor excision with radical neck dissection, followed by adjuvant CCRT."],"tone":"amber"},{"heading":"Stage IVA (Resectable)","items":["Definitive CCRT then salvage surgery if feasible; or induction chemotherapy then CCRT/salvage surgery; or upfront excision + node dissection then adjuvant CCRT."],"tone":"amber"},{"heading":"Stage IVB-C (Unresectable / Metastatic)","items":["Stage IVB unresectable disease is treated per stage IVC principles.","Stage IVC: palliative chemotherapy ± targeted therapy/immunotherapy, with radiotherapy for local symptom control."],"tone":"rose"},{"heading":"Biomarker-Directed Therapy","items":["EGFR is overexpressed in most cases, supporting anti-EGFR therapy (cetuximab); immune checkpoint inhibitors benefit platinum-refractory disease, and pembrolizumab+chemo is now first-line for metastatic disease."],"tone":"neutral"}]},"hepatobiliary-cancer":{"clinical_presentation":["Extrahepatic cholangiocarcinoma (perihilar or distal): typically painless obstructive jaundice ± pruritus, pale stool, or acute cholangitis if superinfected.","Intrahepatic cholangiocarcinoma: right-upper-quadrant pain, hepatomegaly, with or without jaundice; may be asymptomatic early.","Gallbladder cancer: often an incidental finding at cholecystectomy for gallstones, or chronic right-upper-quadrant pain.","Ampullary cancer: obstructive jaundice similar to extrahepatic cholangiocarcinoma, sometimes with anemia from chronic blood loss.","Non-specific systemic symptoms: anorexia, weight loss, fatigue."],"en":"Biliary Tract Cancer","epidemiology":["Risk factors for cholangiocarcinoma: choledochal cyst, hepatolithiasis, Caroli disease, primary sclerosing cholangitis, cirrhosis, viral hepatitis B or C, type 2 diabetes, obesity, Clonorchis sinensis infestation, smoking, alcohol use.","Opisthorchis viverrini infestation is the dominant risk factor in northeastern Thailand."],"follow_up":["Surveillance after resection with CT chest/abdomen/pelvis every 6 months (per the source's case example)."],"pathology":["Adenocarcinoma (cholangiocarcinoma) is the most common histology; growth patterns are mass-forming, periductal, or intraductal.","Typical CT findings: hypodense lesion with progressive rim enhancement on delayed phase, perilesional biliary dilatation, capsular retraction.","Tissue biopsy is recommended before treatment (except when upfront resection is planned); biopsy also enables testing for targetable mutations.","Differential diagnosis includes other rare tumors and IgG4-related disease."],"regimens":[{"approach":"Post-surgical chemotherapy","evidence":"BILCAP trial","line":"Adjuvant (resected)","regimen":"Capecitabine monotherapy x 6 months"},{"approach":"Chemo-immunotherapy","evidence":"TOPAZ-1 (durvalumab); KEYNOTE-966 (pembrolizumab)","line":"First-line, metastatic/unresectable","regimen":"Cisplatin + gemcitabine + immunotherapy (durvalumab or pembrolizumab)"},{"approach":"Chemotherapy","evidence":"ABC-06 trial","line":"Second-line, metastatic","regimen":"FOLFOX"},{"approach":"Targeted therapy","evidence":"–","line":"Subsequent-line, biomarker-selected","regimen":"Ivosidenib (IDH1-mutant); pemigatinib/infigratinib/futibatinib (FGFR2 fusion); trastuzumab+pertuzumab (HER2-overexpressing)"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Biliary Tract Cancer chapter","version":"1st ed."},"staging":["CT chest/abdomen/pelvis for staging; tumor markers CEA and CA19-9 for monitoring (checked after biliary drainage if jaundiced, since cholestasis falsely elevates CA19-9).","No single universally defined resectability criterion — resectable disease generally means no distant metastasis, no invasion of major vasculature or other organs, adequate anticipated liver remnant, and fitness for surgery."],"status":"ready","th":"มะเร็งทางเดินน้ำดี","toxicity_monitoring":["Recurrent cholangitis and biliary obstruction are common in advanced disease — biliary stenting (metallic stents last ~6-10 months, longer than plastic) or percutaneous drains reduce these complications.","Pruritus from biliary obstruction does not correlate with bilirubin level; anion-exchange resins can help, antihistamines are generally ineffective."],"treatment_overview":[{"heading":"Resectable Disease","items":["Complete surgical resection with regional lymphadenectomy is the primary curative treatment, with preoperative biliary drainage if jaundiced.","Despite complete resection, 50-60% of patients recur.","Adjuvant chemotherapy (capecitabine monotherapy x6 months) is the current post-resection standard; adjuvant radiotherapy/CCRT may help extrahepatic tumors with nodal metastasis or R1 margins."],"tone":"accent"},{"heading":"Metastatic / Unresectable Disease","items":["Palliative systemic therapy plus biliary drainage if jaundiced."],"tone":"rose"}]},"kidney-cancer":{"clinical_presentation":["Increasingly detected incidentally on imaging performed for other reasons.","Classic symptoms when present: hematuria, flank pain, or flank mass.","A minority present with metastatic symptoms — lymphadenopathy, bone pain, cough or dyspnea from lung metastases.","Constitutional symptoms can include fever, anorexia, weight loss, anemia, or varicocele."],"en":"Kidney Cancer (Renal Cell Carcinoma)","epidemiology":["Smoking, hypertension, and obesity are established risk factors.","Among hereditary RCC syndromes, von Hippel-Lindau (VHL) disease is the most common — an autosomal dominant condition causing clear cell RCC together with vascular abnormalities in multiple organs."],"follow_up":["The case example planned a total of 35 immunotherapy cycles (about 2 years), continuing targeted therapy afterward until disease progression; a general surveillance schedule is not reported in the source."],"pathology":["Clear cell RCC is the most common histology, arising via the VHL pathway.","Workup includes CBC, corrected serum calcium, creatinine, liver function tests, LDH, and urinalysis.","CT with contrast or MRI of the abdomen plus CT chest is used for staging; bone scan and brain imaging are reserved for cases with symptoms suggestive of metastasis to those sites.","Biopsy is not required before surgery in every case — it is considered for small masses being managed non-operatively, centrally-located lesions, or when imaging cannot distinguish RCC from urothelial carcinoma or lymphoma.","Genetic evaluation is recommended for patients under 46 years old with multiple synchronous renal masses at diagnosis, or a family history of kidney cancer."],"regimens":[{"approach":"Immunotherapy","evidence":"Improves disease-free and overall survival in stage 2-3 high-risk disease and after metastasectomy in stage 4","line":"Adjuvant, high-risk clear cell RCC","regimen":"Pembrolizumab"},{"approach":"Immunotherapy plus TKI, or dual immunotherapy","evidence":"KEYNOTE-426, CheckMate 9ER, lenvatinib+pembrolizumab trial, CheckMate 214, JAVELIN Renal 101","line":"Metastatic, first line","regimen":"Pembrolizumab plus axitinib; nivolumab plus cabozantinib; lenvatinib plus pembrolizumab; nivolumab plus ipilimumab; avelumab plus axitinib"},{"approach":"Targeted therapy (TKI or mTOR inhibitor)","evidence":"Multiple approved single-agent and combination options","line":"Metastatic, alternative or subsequent line","regimen":"Axitinib, cabozantinib, lenvatinib, pazopanib, sunitinib, temsirolimus, everolimus, sorafenib, or bevacizumab"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Kidney Cancer chapter","version":"1st ed."},"stage_badges":["I","II","III","IV"],"staging":["AJCC TNM Staging System, 8th edition (2017)."],"status":"ready","th":"มะเร็งไต","toxicity_monitoring":["Not detailed in the source; the case example tolerated combined pembrolizumab plus lenvatinib with only mild treatment-related side effects."],"treatment_overview":[{"heading":"Localized Disease","items":["Radical nephrectomy or nephron-sparing surgery is the primary treatment for both clear cell and non-clear cell RCC."],"tone":"accent"},{"heading":"Adjuvant Therapy (High-Risk Clear Cell)","items":["Stage 2-3 with high-risk features: adjuvant pembrolizumab improves disease-free and overall survival, and is also recommended after metastasectomy in stage 4 disease; adjuvant targeted therapy (TKIs/anti-VEGF antibodies) is not currently recommended given unclear benefit and significant toxicity."],"tone":"amber"},{"heading":"Metastatic / Recurrent Disease — Surgery","items":["Goals are survival prolongation and quality of life — palliative nephrectomy for bleeding or bulky symptomatic disease; metastasectomy when the primary and limited metastatic disease are resectable; cytoreductive surgery may help only in very-low-risk disease, with unclear evidence overall."],"tone":"rose"},{"heading":"Metastatic / Recurrent Disease — Systemic Therapy","items":["Targeted therapy (TKIs, anti-VEGF antibodies, mTOR inhibitors) and immunotherapy (checkpoint inhibitors); combination targeted-plus-immunotherapy, or dual immunotherapy, is the current standard for clear cell RCC, with benefit also seen in some non-clear cell RCC.","High-dose IL-2 and interferon-alpha are not recommended currently due to limited benefit and significant toxicity."],"tone":"rose"},{"heading":"Palliative Radiation","items":["Used for palliation of bone pain from metastases."],"tone":"neutral"}]},"lung-cancer":{"clinical_presentation":["NSCLC: cough, dyspnea/exertional fatigue; can present in never-smokers.","SCLC: cough, anorexia/weight loss, hoarseness (recurrent laryngeal nerve involvement); often presents with bulky supraclavicular or mediastinal lymphadenopathy in a heavy smoker."],"en":"Lung Cancer (NSCLC & SCLC)","epidemiology":["Not quantified in the source (no incidence data given).","NSCLC can occur in never-smokers, particularly adenocarcinoma.","SCLC is strongly smoking-associated (source case: 45y male, 25 pack-year current smoker)."],"follow_up":["Not detailed beyond response assessment (partial response = ≥30% reduction in tumor burden) and continuing effective therapy until progression."],"pathology":["NSCLC: bronchoscopic biopsy; adenocarcinoma confirmed by IHC (TTF-1+, CK7+, CK20-, Napsin A+); squamous cell carcinoma (p40+, p63+, TTF-1-).","NSCLC driver testing before first-line treatment: EGFR (exon 19 deletion, L858R), ALK fusion, ROS1 rearrangement, BRAF V600E, NTRK fusion, plus PD-L1 (22C3) expression.","SCLC: small round blue-cell tumor on histology, confirmed by IHC — positive for chromogranin, synaptophysin, TTF-1, NCAM/CD56."],"regimens":[{"approach":"Targeted therapy","evidence":"–","line":"NSCLC — adjuvant, driver-positive","regimen":"Osimertinib 80mg/day x3 years (sensitizing EGFR exon19del/L858R)"},{"approach":"Chemoradiation + consolidation immunotherapy","evidence":"PACIFIC trial","line":"NSCLC — definitive, unresectable stage III","regimen":"Concurrent chemoradiation, then durvalumab x1 year if controlled"},{"approach":"Targeted therapy by oncogenic driver","evidence":"–","line":"NSCLC — first-line, metastatic, driver-positive","regimen":"EGFR: gefitinib/erlotinib/afatinib/osimertinib/dacomitinib; ALK: crizotinib/alectinib/ceritinib/brigatinib/lorlatinib; ROS1: crizotinib/entrectinib/ceritinib/lorlatinib; NTRK: larotrectinib/entrectinib; BRAF V600E: dabrafenib+trametinib or vemurafenib"},{"approach":"Chemo-immunotherapy (PD-L1-guided)","evidence":"–","line":"NSCLC — first-line, metastatic, driver-negative","regimen":"PD-L1>=50%: pembrolizumab or atezolizumab alone. Otherwise: platinum+pemetrexed+pembrolizumab (non-squamous); carboplatin+paclitaxel+pembrolizumab (squamous); carboplatin+nab-paclitaxel+atezolizumab (non-squamous); nivolumab+ipilimumab; carboplatin+paclitaxel+atezolizumab+bevacizumab (non-squamous)"},{"approach":"Chemo +/- targeted/immunotherapy","evidence":"–","line":"NSCLC — subsequent-line, driver-negative","regimen":"Docetaxel or pemetrexed (non-squamous only); docetaxel+nintedanib or docetaxel+ramucirumab; immunotherapy (atezolizumab/nivolumab/pembrolizumab if PD-L1>1%) if not previously given"},{"approach":"Concurrent chemoradiation","evidence":"–","line":"SCLC — limited-stage, good PS","regimen":"Cisplatin + etoposide x4-6 cycles with concurrent thoracic radiotherapy"},{"approach":"Chemo-immunotherapy","evidence":"IMpower133 (atezolizumab); CASPIAN (durvalumab)","line":"SCLC — extensive-stage, first-line","regimen":"Atezolizumab + carboplatin + etoposide, or durvalumab + (cisplatin/carboplatin) + etoposide x4 cycles, then immunotherapy maintenance"},{"approach":"Second-line chemotherapy","evidence":"–","line":"SCLC — relapse <6 months, ECOG 0-2","regimen":"Topotecan, paclitaxel, docetaxel, irinotecan, temozolomide, gemcitabine, or CAV (cyclophosphamide/doxorubicin/vincristine); nivolumab +/- ipilimumab or pembrolizumab"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — NSCLC & SCLC chapters","version":"1st ed."},"stage_badges":["I","II","III","IV","LD (SCLC)","ED (SCLC)"],"staging":["Both NSCLC and SCLC are staged with the AJCC Cancer Staging Manual, 8th edition (TNM-based).","SCLC is additionally staged with the two-tier VA scheme: Limited-stage (LD) — confined to one hemithorax; Extensive-stage (ED) — disease beyond the ipsilateral hemithorax, including malignant pleural effusion or hematogenous metastasis."],"status":"ready","th":"มะเร็งปอด","toxicity_monitoring":["Bevacizumab-containing regimens are contraindicated in squamous histology, brain metastasis, hemoptysis, or a major thromboembolic event.","Pemetrexed is not used in squamous histology."],"treatment_overview":[{"heading":"NSCLC — Resectable Early-Stage","items":["Surgery ± adjuvant chemotherapy, adjuvant osimertinib x3 years if EGFR-mutant, adjuvant immunotherapy as an option, adjuvant radiotherapy for positive margins."],"tone":"accent"},{"heading":"NSCLC — Locally Advanced / Unresectable","items":["Mostly stage III: definitive chemoradiation then consolidation durvalumab x1 year if controlled."],"tone":"amber"},{"heading":"NSCLC — Advanced / Metastatic","items":["Driver-positive disease gets matched targeted therapy; driver-negative disease gets chemotherapy ± immunotherapy ± bevacizumab."],"tone":"rose"},{"heading":"SCLC — Limited-Stage","items":["Concurrent cisplatin/etoposide chemoradiation for good-performance-status stage IIB-IIIC."],"tone":"amber"},{"heading":"SCLC — Extensive-Stage","items":["Platinum-etoposide chemotherapy plus immunotherapy, continued as maintenance if response is achieved."],"tone":"rose"}]},"melanoma-skin-cancer":{"clinical_presentation":[">70% present with a change in color or size of a pre-existing skin lesion.","ABCDE criteria (Asymmetry, Border irregularity, Color variation, Diameter, Evolution) aid clinical distinction from benign lesions; dermoscopy improves accuracy.","Advanced disease may present with regional lymphadenopathy or symptoms from distant organ involvement, with or without an obvious skin lesion.","Four subtypes by descending overall frequency: superficial spreading, lentigo maligna, nodular, and acral lentiginous melanoma (dominant in Asian populations — palms/soles/nailbeds, often deeper and more often ulcerated).","Can also arise from internal mucosal surfaces (mucosal melanoma) or the eye (uveal melanoma)."],"en":"Melanoma / Skin Cancer","epidemiology":["The most important cause is UV/sun exposure.","Dysplastic nevi carry ~6% lifetime transformation risk, especially with a family history of melanoma.","Other risk factors: fair skin phenotype (red/blonde hair, blue/green/light-brown eyes, freckling), immunosuppressive medication, xeroderma pigmentosum.","In Asia, including Thailand, acral lentiginous melanoma predominates (41.8-65% of cases), unlike the sun-exposure-driven subtypes common in Western populations."],"follow_up":["Not detailed in the source."],"pathology":["Excisional biopsy with 1-2mm margins is the diagnostic standard (superior to punch biopsy for measuring Breslow thickness, which drives staging and prognosis).","IHC (e.g. Melan-A) may assist diagnosis of non-cutaneous lesions.","Molecular testing (PCR or NGS) for BRAF, KIT, and NTRK guides prognosis and treatment selection.","BRAF mutation is associated with worse baseline prognosis, mitigated by BRAF-targeted therapy.","Acral lentiginous melanoma has a lower BRAF mutation rate (~14.3%) than superficial spreading melanoma (~50%)."],"regimens":[{"approach":"Immunotherapy","evidence":"KEYNOTE-716","line":"Adjuvant, stage IIB-IIC","regimen":"Pembrolizumab x1 year"},{"approach":"Immunotherapy or targeted therapy","evidence":"CheckMate 238; KEYNOTE-054; COMBI-AD","line":"Adjuvant, stage III","regimen":"Nivolumab, pembrolizumab, or dabrafenib+trametinib (if BRAF V600-mutated) x1 year"},{"approach":"Immunotherapy","evidence":"CheckMate 238","line":"Adjuvant, stage IV (fully resected)","regimen":"Nivolumab x1 year"},{"approach":"Targeted therapy","evidence":"CoBRIM, COMBI-v, COLUMBUS","line":"Unresectable/metastatic, BRAF-mutant","regimen":"BRAF inhibitor + MEK inhibitor (vemurafenib+cobimetinib, dabrafenib+trametinib, or encorafenib+binimetinib)"},{"approach":"Immunotherapy","evidence":"CheckMate-067, RELATIVITY-047, KEYNOTE-006","line":"Unresectable/metastatic, first-line","regimen":"Nivolumab+ipilimumab, nivolumab+relatlimab, or single-agent nivolumab/pembrolizumab"},{"approach":"Cytotoxic chemotherapy","evidence":"–","line":"If immunotherapy inaccessible/ineffective","regimen":"Dacarbazine, carboplatin, or paclitaxel (response rate ~5-28%)"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Melanoma chapter","version":"1st ed."},"stage_badges":["I","II","III","IV"],"staging":["AJCC staging system, 8th edition (2016).","Uses Breslow thickness and ulceration status, plus regional nodal and distant spread.","Stage I-II: no nodal spread.","Stage III: regional lymph node, in-transit, or microsatellite metastases.","Stage IV: distant metastasis."],"status":"ready","th":"มะเร็งผิวหนังเมลาโนมา","toxicity_monitoring":["DREAMseq observed early deaths in a subset on frontline nivolumab+ipilimumab.","Combining BRAF/MEK inhibition with immunotherapy increases toxicity without added overall survival benefit."],"treatment_overview":[{"heading":"Early-Stage / Localized Disease","items":["Surgical resection ± radiotherapy in selected cases."],"tone":"accent"},{"heading":"Adjuvant Therapy (High-Risk Resected Disease)","items":["2023 source: stage IIB-IIC — pembrolizumab x1 year; stage III — nivolumab, pembrolizumab, or dabrafenib+trametinib (if BRAF-mutant) x1 year; stage IV fully resected — nivolumab x1 year."],"tone":"amber"},{"heading":"Unresectable / Metastatic — BRAF-Mutant","items":["BRAF+MEK inhibition gives fast, high initial response.","Sequencing of targeted vs. immunotherapy is unresolved — DREAMseq favored starting with immunotherapy; SECOMBIT suggests a short BRAF-inhibitor lead-in as a comparable alternative.","Combining BRAF inhibition with immunotherapy increases toxicity and progression-free survival but not overall survival."],"tone":"rose"},{"heading":"Unresectable / Metastatic — Immunotherapy","items":["Anti-PD-1 ± anti-CTLA-4/anti-LAG-3 gives more durable long-term responses; combination outperforms monotherapy with low PD-L1, BRAF mutation, high LDH, or brain metastasis."],"tone":"rose"},{"heading":"BRAF Wild-Type Disease","items":["Consider KIT/NTRK testing or immunotherapy; conventional chemotherapy remains an option where advanced agents are inaccessible (cost is a barrier in Thailand per the source)."],"tone":"neutral"}]},"neuroendocrine-tumors":{"clinical_presentation":["Often asymptomatic, found incidentally on endoscopy, surgery, or imaging.","Mass-effect symptoms depending on location, e.g. jaundice from bile-duct compression, or gut obstruction from a small-bowel mass.","Carcinoid syndrome — flushing, diarrhea, bronchospasm, abdominal cramping, peripheral edema, palpitations — results from serotonin and substance P secretion."],"en":"Neuroendocrine Tumors (NETs)","epidemiology":["Arise from neuroendocrine cells present throughout the body; the precise cause is unknown.","Associated with inherited syndromes: Multiple Endocrine Neoplasia type 1 (MEN1), MEN type 2, von Hippel-Lindau disease, tuberous sclerosis complex, neurofibromatosis type 1, and Carney complex."],"follow_up":["Not reported in the source."],"pathology":["Classified by hormone secretion (functioning vs. non-functioning), anatomic origin (bronchopulmonary; gastroenteropancreatic NETs further split into foregut, midgut, hindgut), and WHO classification by tumor differentiation, grade, mitotic count, and Ki-67 index.","Immunohistochemistry is positive for chromogranin, synaptophysin, neuron-specific enolase, and CD56.","Radiolabeled somatostatin receptor scintigraphy is used selectively, e.g. to assess candidacy for somatostatin analogue therapy."],"regimens":[{"approach":"Somatostatin analogue","evidence":"PROMID, CLARINET trials","line":"Carcinoid symptom control","regimen":"Octreotide LAR 20-30mg IM every 4 weeks, or Lanreotide 120mg SC every 4 weeks"},{"approach":"Targeted therapy","evidence":"RADIANT trial series; sunitinib pancreatic NET trial","line":"Metastatic G1/G2, unresectable","regimen":"Everolimus 10mg/day; Sunitinib 37.5mg/day (pancreatic NET only)"},{"approach":"Peptide receptor radionuclide therapy","evidence":"For somatostatin-receptor-positive disease on imaging","line":"Metastatic G1/G2, SSTR-positive","regimen":"177Lu-dotatate PRRT"},{"approach":"Cytotoxic chemotherapy","evidence":"Relatively good response rates reported in pancreatic NET","line":"Symptomatic/bulky/progressive, especially pancreatic NET","regimen":"Temozolomide ± capecitabine; streptozocin-based; oxaliplatin-based (FOLFOX or CapeOx)"},{"approach":"Cytotoxic chemotherapy","evidence":"Standard for poorly-differentiated NEC","line":"Neuroendocrine carcinoma (NEC)","regimen":"Cisplatin or carboplatin plus etoposide; FOLFOX; FOLFIRI; temozolomide ± capecitabine"},{"approach":"Immunotherapy","evidence":"For selected biomarker-positive NEC","line":"NEC, biomarker-selected","regimen":"Nivolumab plus ipilimumab (category 2B, metastatic progressive disease); pembrolizumab (MSI-H/dMMR or TMB-H ≥10 mut/Mb)"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Neuroendocrine Tumors chapter","version":"1st ed."},"stage_badges":["G1","G2","G3","NEC"],"staging":["Graded per the 2019 WHO classification for GI/hepatopancreatobiliary NETs and the 2015 WHO criteria for pulmonary NETs, using differentiation, grade, mitotic count, and Ki-67 index.","Well-differentiated tumors are graded G1/G2/G3; poorly-differentiated tumors are classified as Neuroendocrine Carcinoma (NEC)."],"status":"ready","th":"เนื้องอกนิวโรเอนโดครัยน์ (มะเร็งเน็ต)","toxicity_monitoring":["Not reported in the source."],"treatment_overview":[{"heading":"Well-Differentiated NET, G1/G2","items":["Somatostatin analogues for carcinoid symptom control; curative surgery is the mainstay for localized disease; surgery is also considered for metastatic disease when both primary and metastatic sites are resectable.","Unresectable/metastatic disease: observation (asymptomatic, low tumor burden), locoregional therapy (TAE/TACE or radiofrequency ablation for liver-dominant disease), or systemic therapy (somatostatin analogues, everolimus, sunitinib for pancreatic NET, peptide receptor radionuclide therapy, or cytotoxic chemotherapy for symptomatic/bulky/progressive disease)."],"tone":"accent"},{"heading":"Well-Differentiated NET, G3","items":["Favorable biology (Ki-67 <55%, slow growth, positive SSTR-based PET imaging) is treated like G1/G2 disease; unfavorable biology is treated with cytotoxic chemotherapy as for NEC."],"tone":"amber"},{"heading":"Neuroendocrine Carcinoma (NEC)","items":["Chemotherapy-based treatment, with local therapy (surgery or radiation) added when disease is non-metastatic."],"tone":"rose"}]},"ovarian-cancer":{"clinical_presentation":["Most symptomatic patients present with ascites and nonspecific GI symptoms (abdominal pain, constipation), usually once disease is already advanced.","Advanced disease can present with dyspnea, weight loss, or venous thromboembolism."],"en":"Ovarian Cancer","epidemiology":["Epithelial ovarian cancer is the most common subtype, accounting for over 90% of cases.","Risk factors include genetic predisposition, age, nulliparity, and endometriosis.","BRCA1/2 mutations (autosomal dominant) are found in up to 17% of ovarian cancer patients and also raise the risk of breast, pancreatic, and prostate cancer.","Other homologous recombination repair (HRR) pathway gene mutations (e.g. RAD51C/D, PALB2) also increase ovarian cancer risk; HRR pathway abnormalities are found in about 50% of high-grade serous ovarian cancer."],"follow_up":["Not reported in the source."],"pathology":["Workup includes the CA-125 tumor marker, CT or MRI of the abdomen and pelvis (± chest CT), and tissue pathology, which is the diagnostic gold standard and can also be used for genetic testing.","Germline BRCA1/2 testing is recommended for all epithelial ovarian cancer patients regardless of age; testing for other HRR pathway genes is also recommended."],"regimens":[{"approach":"Platinum-based chemotherapy","evidence":"Approximately 40-50% response rate","line":"First line, advanced disease","regimen":"Carboplatin plus paclitaxel"},{"approach":"Chemotherapy plus anti-angiogenic therapy","evidence":"Improves survival; response rate up to approximately 67%","line":"First line, advanced disease","regimen":"Carboplatin/paclitaxel plus bevacizumab"},{"approach":"PARP inhibitor","evidence":"SOLO-1, PRIMA trials","line":"Maintenance, BRCA1/2-mutated","regimen":"Olaparib or niraparib after complete/partial response to chemotherapy"},{"approach":"PARP inhibitor","evidence":"An option beyond chemotherapy alone","line":"Relapsed, BRCA1/2-mutated","regimen":"Olaparib or niraparib"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Ovarian Cancer chapter","version":"1st ed."},"stage_badges":["I","II","III","IV"],"staging":["FIGO staging system."],"status":"ready","th":"มะเร็งรังไข่","toxicity_monitoring":["Not reported in the source."],"treatment_overview":[{"heading":"General Approach","items":["Chemotherapy aims to eliminate disease not amenable to surgery, given either peri-operatively or for palliation."],"tone":"neutral"},{"heading":"Advanced Disease (FIGO III-IV)","items":["Often responds well to platinum-based chemotherapy; treatment may start with chemotherapy, proceed to interval debulking surgery if response is seen, then complete at least 6 total cycles of chemotherapy.","Disease unresectable at diagnosis, or already disseminated, is treated with platinum-based chemotherapy plus bevacizumab (an angiogenesis inhibitor)."],"tone":"rose"},{"heading":"BRCA1/2-Mutated Disease","items":["A PARP inhibitor (olaparib or niraparib) is used as maintenance after complete or partial response to chemotherapy, or as treatment after relapse."],"tone":"amber"}]},"pancreatic-cancer":{"clinical_presentation":["Most present with weight loss; jaundice from biliary obstruction with steatorrhea; epigastric pain radiating to the back; nausea/vomiting; or features of pancreatitis.","New-onset diabetes after age 50, especially with accompanying abdominal pain or weight loss, should raise suspicion."],"en":"Pancreatic Cancer","epidemiology":["Risk increases with family history (genetic predisposition), smoking (modest increase), overweight/obesity, long-standing diabetes, alcohol use, and a history of chronic pancreatitis."],"follow_up":["Not reported in the source guideline."],"pathology":["Adenocarcinoma is the most common histology, confirmed via liver biopsy in metastatic disease or EUS-guided biopsy/cytology.","No general-population screening is recommended; high-risk individuals (strong family history) may be offered EUS or MRI/MRCP surveillance."],"regimens":[{"approach":"Combination chemotherapy","evidence":"–","line":"Advanced/metastatic, fit patients","regimen":"FOLFIRINOX; or gemcitabine alone or combined with oxaliplatin/capecitabine; capecitabine + oxaliplatin"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Pancreatic Cancer chapter","version":"1st ed."},"stage_badges":["I","II","III","IV"],"staging":["AJCC TNM staging system, 8th edition (2017).","Stage I (T1-2N0, limited to pancreas) — 5-yr survival ~20%.","Stage II (T3 or N1) — 5-yr survival ~8%.","Stage III (T4, or celiac axis/SMA involvement).","Stage IV (M1, distant metastasis — the most common presentation, 53% of cases) — 5-yr survival ~2%.","Pancreatic-protocol CT or MRI (including chest and pelvis) determines resectability; EUS obtains cytology or is used when CT is not clearly diagnostic."],"status":"ready","th":"มะเร็งตับอ่อน","toxicity_monitoring":["Not reported in the source guideline."],"treatment_overview":[{"heading":"Stage I-II (Resectable)","items":["Curative-intent surgery aiming for R0 resection."],"tone":"accent"},{"heading":"Stage III-IV (Locally Advanced / Metastatic)","items":["Inoperable but localized (III) and metastatic (IV) disease: systemic therapy is the mainstay, aimed at disease control and prolonging survival rather than cure."],"tone":"rose"}]},"prostate-cancer":{"clinical_presentation":["May present with lower urinary tract symptoms (straining to void — often attributed to benign prostatic hyperplasia).","Advanced disease: bone pain (often worse at night, non-positional) from osteoblastic bone metastases.","A markedly elevated PSA (case example: 248 ng/mL) raises suspicion for metastatic disease."],"en":"Prostate Cancer","epidemiology":["Not quantified in the source. The case example is an elderly male (70y) with prior untreated benign-prostatic-hyperplasia symptoms who presented with metastatic disease."],"follow_up":["Not detailed beyond serial PSA and imaging to detect progression (illustrated by the case's PSA rise from 0.5 to 60 ng/mL after initial ADT response)."],"pathology":["Diagnosis via TRUS (transrectal ultrasound)-guided biopsy; adenocarcinoma is the predominant histology.","Graded with the Gleason scoring system (2-10), combining the two most common histologic patterns (well-differentiated=1 to anaplastic=5), e.g. 3+4=7."],"regimens":[{"approach":"ADT +/- intensification","evidence":"–","line":"mHSPC/mCSPC","regimen":"ADT (orchiectomy, GnRH agonist+antiandrogen, or GnRH antagonist) +/- apalutamide/enzalutamide/abiraterone; + docetaxel if visceral or extensive bone metastases"},{"approach":"Sequential systemic therapy by biomarker/disease pattern","evidence":"–","line":"mCRPC","regimen":"Docetaxel or cabazitaxel; abiraterone acetate; enzalutamide; sipuleucel-T; radium-223 (bone-only mets) or lutetium-177 (PSMA-positive); PARP inhibitors (olaparib, niraparib, talazoparib, rucaparib) if BRCA-mutated"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Prostate Cancer chapter","version":"1st ed."},"stage_badges":["mHSPC/mCSPC","mCRPC"],"staging":["Metastatic workup with bone scan and CT; PSMA PET is a newer, more disease-specific modality with superior detection of locoregional and distant spread.","mHSPC/mCSPC: metastatic disease not yet treated with hormonal therapy.","mCRPC: progression (rising PSA and/or radiographic progression) despite castrate testosterone levels."],"status":"ready","th":"มะเร็งต่อมลูกหมาก","toxicity_monitoring":["Not detailed beyond bone-directed agent indications; monitor for skeletal-related events in patients with bone metastases."],"treatment_overview":[{"heading":"Metastatic Hormone-Sensitive (mHSPC/mCSPC)","items":["Androgen deprivation therapy (ADT) via orchiectomy, GnRH agonist (+antiandrogen), or GnRH antagonist; survival benefit from adding novel antiandrogens or, in visceral/extensive bone disease, docetaxel, to ADT."],"tone":"amber"},{"heading":"Bone-Directed Therapy","items":["Bone-antiresorptive agents reduce skeletal-related events; palliative radiotherapy reduces bone pain; surgery relieves pain and stabilizes or prevents pathological fractures."],"tone":"neutral"},{"heading":"Metastatic Castration-Resistant (mCRPC)","items":["Sequential options include chemotherapy, androgen-synthesis/receptor inhibition, immunotherapy, radionuclide therapy, and PARP inhibitors (if BRCA-mutated)."],"tone":"rose"}]},"sarcoma":{"clinical_presentation":["Painless, enlarging soft tissue mass at the site of origin.","Most common sites: extremities (60%), trunk (19%), retroperitoneum (15%), head and neck (9%).","Lymph node spread is uncommon; metastatic disease predominantly involves the lungs."],"en":"Soft Tissue Sarcoma","epidemiology":["Sarcomas (connective-tissue malignancies) comprise soft tissue sarcoma (>50 WHO-recognized subtypes) and bone sarcoma; soft tissue sarcoma is ~4x more common than bone sarcoma in adults.","Overall incidence ~1% of adult cancers and ~15% of pediatric cancers.","Hereditary syndromes: Li-Fraumeni (rhabdomyosarcoma), hereditary retinoblastoma (leiomyosarcoma), neurofibromatosis type 1 (malignant peripheral nerve sheath tumor).","Other risk factors: vinyl chloride exposure (hepatic angiosarcoma), prior radiotherapy, chronic lymphedema (angiosarcoma), human herpesvirus-8 infection (Kaposi sarcoma)."],"follow_up":["Not detailed beyond routine chest imaging surveillance (implied by high rate of pulmonary metastasis) and palliative care integration throughout."],"pathology":["Named by tissue of origin (e.g. leiomyosarcoma — smooth muscle; rhabdomyosarcoma — skeletal muscle; liposarcoma — adipose tissue).","Diagnosis requires tissue for histopathology, with IHC or genetic testing for subtyping; core needle biopsy by a sarcoma-experienced surgeon is recommended (biopsy tract can affect surgical planning).","Fine-needle aspiration is discouraged — insufficient sampling for diagnosis.","Contrast-enhanced MRI or CT assesses size and vascular/neural involvement for surgical planning; chest imaging assesses for pulmonary metastasis."],"regimens":[{"approach":"Combination chemotherapy","evidence":"Judson et al.","line":"Metastatic, first-line, high symptom burden","regimen":"Doxorubicin + ifosfamide (higher response rate than doxorubicin alone, no proven survival benefit)"},{"approach":"Chemotherapy/targeted therapy by histologic subtype","evidence":"PALETTE (pazopanib)","line":"Metastatic, subtype-directed","regimen":"Ifosfamide (synovial sarcoma, myxoid/round-cell liposarcoma); gemcitabine+docetaxel (leiomyosarcoma, especially uterine; undifferentiated pleomorphic sarcoma); eribulin (liposarcoma); trabectedin ('L-sarcomas' — liposarcoma and leiomyosarcoma); pazopanib (not used in liposarcoma)"},{"approach":"Immunotherapy, subtype-selected","evidence":"–","line":"Metastatic, immunotherapy (limited role)","regimen":"Pembrolizumab — small studies in myxofibrosarcoma, undifferentiated pleomorphic sarcoma, cutaneous angiosarcoma"}],"source":{"date":"2023-11","name":"Short Notes in Clinical Oncology: A Case-based Approach — Soft Tissue Sarcoma chapter","version":"1st ed."},"staging":["AJCC Staging System, 8th edition (2017), TNM-based.","Incorporates histologic subtype, histologic grade, mitotic count, and tumor necrosis in addition to anatomic extent (extremity/trunk staging is most commonly referenced given higher incidence there)."],"status":"ready","th":"ซาร์โคมา","toxicity_monitoring":["Not detailed beyond agent selection; anthracycline (cardiotoxicity) and ifosfamide are the main adjuvant agents."],"treatment_overview":[{"heading":"Localized Disease","items":["Surgery is the primary treatment for extremity/trunk disease, planned by a sarcoma-experienced surgeon for an adequate margin (≥1cm).","Adjuvant radiotherapy is indicated for tumors larger than 5cm.","Adjuvant chemotherapy has no clear consensus; meta-analysis shows anthracycline + ifosfamide improves 10-year survival by ~5-10%, weighed against subtype chemosensitivity, grade, and location."],"tone":"accent"},{"heading":"Metastatic Disease","items":["Goals shift to prolonging survival and quality of life; isolated limited pulmonary metastases may be resected (metastasectomy); multifocal disease in fit patients gets chemotherapy or targeted therapy by histologic subtype."],"tone":"rose"},{"heading":"Supportive / Palliative Care","items":["Should be integrated from diagnosis onward."],"tone":"neutral"}]},"template-example":{"clinical_presentation":"Example: typical presenting symptoms/signs, and the initial work-up (imaging, laboratory) prompted by them.","en":"Template — not real content","epidemiology":"Example: incidence/prevalence, major risk factors, and any relevant trend cited in the source guideline.","follow_up":"Example: post-treatment surveillance schedule (exam interval, imaging) as specified by the source guideline.","pathology":"Example: predominant histologic subtype(s) and molecular/biomarker findings relevant to classification or treatment selection.","regimens":[{"approach":"Example primary approach (surgery / radiation / systemic therapy)","evidence":"category 1","line":"First line","regimen":"Example regimen name — dose + schedule"},{"approach":"Example approach on resistance/relapse","evidence":"category 2A","line":"On progression","regimen":"Example second-line regimen"}],"source":{"date":"YYYY-MM-DD","name":"[Example guideline/journal name]","version":"vX"},"staging":"Example: the staging system used by the source guideline (e.g. the current AJCC/TNM edition) and how stage groups map to treatment intent.","status":"template","th":"ตัวอย่างโครงสร้าง","toxicity_monitoring":"Example: common toxicities of the above regimens, labs/monitoring required before each cycle, and dose-modification thresholds.","treatment_overview":[{"heading":"Early-Stage Disease","items":["Example: overall treatment intent and modality (surgery/radiation) for early-stage disease."],"tone":"accent"},{"heading":"Locally Advanced Disease","items":["Example: overall treatment intent for locally advanced/unresectable disease."],"tone":"amber"},{"heading":"Metastatic / Recurrent Disease","items":["Example: overall treatment intent for advanced/metastatic disease."],"tone":"rose"}]}};
+
+
+(function(){
+
+  var GROUPS = [
+    { key:"common", label:"Common cancer", items:[
+      {slug:"breast-cancer", th:"มะเร็งเต้านม", en:"Breast cancer"},
+      {slug:"colorectal-cancer", th:"มะเร็งลำไส้ใหญ่และทวารหนัก", en:"Colorectal cancer"},
+      {slug:"hcc", th:"มะเร็งตับ", en:"HCC"},
+      {slug:"hepatobiliary-cancer", th:"มะเร็งท่อน้ำดี/ระบบทางเดินน้ำดี", en:"Hepatobiliary cancer"},
+      {slug:"lung-cancer", th:"มะเร็งปอด", en:"Lung cancer"},
+      {slug:"pancreatic-cancer", th:"มะเร็งตับอ่อน", en:"Pancreatic cancer"},
+      {slug:"prostate-cancer", th:"มะเร็งต่อมลูกหมาก", en:"Prostate cancer"}
+    ]},
+    { key:"gi", label:"GI & GU cancer", items:[
+      {slug:"esophageal-cancer", th:"มะเร็งหลอดอาหาร", en:"Esophageal cancer"},
+      {slug:"gastric-cancer", th:"มะเร็งกระเพาะอาหาร", en:"Gastric (stomach) cancer"},
+      {slug:"gist", th:"เนื้องอก GIST", en:"GIST"},
+      {slug:"kidney-cancer", th:"มะเร็งไต", en:"Kidney cancer"},
+      {slug:"bladder-cancer", th:"มะเร็งกระเพาะปัสสาวะ", en:"Bladder cancer"}
+    ]},
+    { key:"gyn", label:"Gynecologic cancer", items:[
+      {slug:"ovarian-cancer", th:"มะเร็งรังไข่", en:"Ovarian cancer"},
+      {slug:"cervical-cancer", th:"มะเร็งปากมดลูก", en:"Cervical cancer"}
+    ]},
+    { key:"uncommon", label:"Uncommon cancer", items:[
+      {slug:"cup", th:"มะเร็งไม่ทราบตำแหน่งปฐมภูมิ", en:"Cancer of unknown primary"},
+      {slug:"cns-tumor", th:"เนื้องอกสมอง", en:"CNS tumor"},
+      {slug:"germ-cell-tumor", th:"มะเร็งเซลล์สืบพันธุ์", en:"Germ cell tumor"},
+      {slug:"head-neck-cancer", th:"มะเร็งศีรษะและลำคอ", en:"Head and neck cancer"},
+      {slug:"melanoma-skin-cancer", th:"มะเร็งผิวหนัง / เมลาโนมา", en:"Melanoma / Skin cancer"},
+      {slug:"sarcoma", th:"ซาร์โคมา", en:"Sarcoma"},
+      {slug:"neuroendocrine-tumors", th:"เนื้องอกนิวโรเอนโดครัยน์ (มะเร็งเน็ต)", en:"Neuroendocrine tumors"},
+      {slug:"bone-tumor", th:"มะเร็งกระดูก", en:"Bone tumor"}
+    ]},
+    { key:"supportive", label:"Supportive care", items:[
+      {slug:"adr-management", th:"การจัดการอาการไม่พึงประสงค์จากยาต้านมะเร็ง", en:"Adverse drug reactions management"}
+    ]}
+  ];
+
+  var TEMPLATE_SLUG = "template-example";
+
+  var ICONS = {
+    epi: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17V9M13 17V5M8 17v-4"/></svg>',
+    clin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6l-3 4a5 5 0 0 0 10 0l-3-4V2"/><circle cx="19" cy="15" r="2.5"/></svg>',
+    path: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 18h8"/><path d="M3 22h12"/><path d="M14 22a7 7 0 1 0 0-14h-1"/><path d="M9 14h2"/><path d="M9 12a5 5 0 0 1 5-5V4a2 2 0 0 0-2-2H8"/></svg>',
+    stage: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',
+    tx: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 20.5 3.5 13.5a5 5 0 1 1 7-7l7 7a5 5 0 1 1-7 7Z"/><path d="m8.5 8.5 7 7"/></svg>',
+    src: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"/></svg>'
+  };
+
+  var state = { data: DATA, active: null };
+
+  function allItems(){
+    var out = [];
+    GROUPS.forEach(function(g){ g.items.forEach(function(it){ out.push(it); }); });
+    return out;
+  }
+
+  function statusOf(slug){
+    var d = state.data[slug];
+    return d ? d.status : "pending";
+  }
+
+  function renderRail(filter){
+    var wrap = document.getElementById("groups");
+    wrap.innerHTML = "";
+    var f = (filter||"").trim().toLowerCase();
+
+    // template pinned first when it matches / no filter
+    var tplMatches = !f || "ตัวอย่าง template example".indexOf(f) !== -1;
+    if (tplMatches){
+      var lbl = document.createElement("div");
+      lbl.className = "group-label";
+      lbl.textContent = "Reference";
+      wrap.appendChild(lbl);
+      wrap.appendChild(itemButton({slug:TEMPLATE_SLUG, th:"ตัวอย่างโครงสร้าง", en:"Template"}, "template"));
+    }
+
+    GROUPS.forEach(function(g){
+      var matched = g.items.filter(function(it){
+        if(!f) return true;
+        return (it.th+" "+it.en).toLowerCase().indexOf(f) !== -1;
+      });
+      if(!matched.length) return;
+      var lbl2 = document.createElement("div");
+      lbl2.className = "group-label";
+      lbl2.textContent = g.label;
+      wrap.appendChild(lbl2);
+      matched.forEach(function(it){
+        wrap.appendChild(itemButton(it, statusOf(it.slug)));
+      });
+    });
+
+    var ready = allItems().filter(function(it){ return statusOf(it.slug)==="ready"; }).length;
+    document.getElementById("ready-count").textContent = ready;
+    document.getElementById("total-count").textContent = allItems().length;
+  }
+
+  function itemButton(it, status){
+    var btn = document.createElement("button");
+    btn.className = "item" + (state.active===it.slug ? " active" : "");
+    btn.innerHTML =
+      '<span class="dot '+status+'"></span>' +
+      '<span class="name">'+it.en+'<span class="sub">'+it.th+'</span></span>';
+    btn.addEventListener("click", function(){
+      state.active = it.slug;
+      renderRail(document.getElementById("search").value);
+      renderMain(it.slug);
+      if (window.innerWidth <= 860) document.getElementById("main").scrollIntoView({behavior:"smooth"});
+    });
+    return btn;
+  }
+
+  function escapeHtml(s){
+    return String(s==null?"":s).replace(/[&<>"]/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];
+    });
+  }
+
+  function renderMain(slug){
+    var main = document.getElementById("main");
+    if(!slug){
+      main.innerHTML =
+        '<div class="empty">' +
+          '<div class="eyebrow">Onco Reference</div>' +
+          '<h2>เลือกชนิดมะเร็งทางซ้ายเพื่อดูสรุป</h2>' +
+          '<p>หน้านี้เป็นไฟล์ static เก็บสรุปทั้งหมด ณ วันที่ export ไว้ในตัวไฟล์เอง — เปิดได้จากทุกเบราว์เซอร์โดยไม่ต้องล็อกอิน Claude</p>' +
+          '<div class="howto">' +
+            '<b>เกี่ยวกับไฟล์นี้</b>' +
+            '<ol>' +
+              '<li>ข้อมูลทั้งหมด (23  ชนิดมะเร็ง) ถูกฝังไว้ในไฟล์นี้แล้ว ไม่ต้องต่อเน็ตก็เปิดดูได้</li>' +
+              '<li>อัปเดตครั้งล่าสุด: <b>2026-09-05</b> — ถ้าอยากได้ฉบับล่าสุดหลังแก้ไขบน Claude ให้ export ไฟล์นี้ใหม่</li>' +
+              '<li>เพิ่ม/แก้สรุปใหม่ยังต้องทำผ่าน Onco Reference บน Claude แล้วค่อย export ไฟล์ static นี้ใหม่อีกครั้ง</li>' +
+            '</ol>' +
+          '</div>' +
+        '</div>';
+      return;
+    }
+
+    var d = state.data[slug] || {status:"pending"};
+    var meta = findItem(slug) || {th:d.th, en:d.en};
+
+    if (d.status === "pending" || !d.status){
+      main.innerHTML =
+        '<div class="detail-head">' +
+          '<div><h2>'+escapeHtml(meta.en)+'</h2><div class="sub">'+escapeHtml(meta.th)+'</div></div>' +
+          '<span class="badge pending">รอข้อมูล</span>' +
+        '</div>' +
+        '<div class="pending-note">ยังไม่มีสรุปสำหรับชนิดนี้ — แนบ guideline หรือ journal ของ '+escapeHtml(meta.th)+' ในแชท แล้วขอให้สรุป จะมาโผล่ตรงนี้ให้อัตโนมัติ</div>';
+      return;
+    }
+
+    var isTemplate = d.status === "template";
+    var badgeHtml = isTemplate
+      ? '<span class="badge template">ตัวอย่าง (Template)</span>'
+      : '<span class="badge ready">พร้อมใช้</span>';
+
+    var html = '<div class="detail-head">' +
+        '<div><h2>'+escapeHtml(meta.en || d.en)+'</h2><div class="sub">'+escapeHtml(meta.th || d.th)+'</div></div>' +
+        badgeHtml +
+      '</div>';
+
+    if (isTemplate){
+      html += '<div class="template-flag">เนื้อหาด้านล่างเป็นตัวอย่างโครงสร้างเท่านั้น ไม่ใช่ข้อมูลทางคลินิกจริง — ใช้เพื่อดูหน้าตาผลลัพธ์ที่จะได้เมื่อสรุปจริงถูกเพิ่มเข้ามา</div>';
+    }
+
+    var stageBadges = (d.stage_badges||[]).length
+      ? '<div class="chip-row">'+d.stage_badges.map(function(s){ return '<span class="chip on">'+escapeHtml(s)+'</span>'; }).join("")+'</div>'
+      : '';
+
+    html += block(ICONS.epi, "Epidemiology", bullets(d.epidemiology));
+    html += block(ICONS.clin, "Clinical Presentation", bullets(d.clinical_presentation));
+    html += block(ICONS.path, "Pathology", bullets(d.pathology));
+    html += block(ICONS.stage, "Staging", stageBadges + bullets(d.staging));
+
+    var txRows = (d.regimens||[]).map(function(t){
+      return '<div class="tx-row">' +
+        '<div class="line">'+escapeHtml(t.line)+'</div>' +
+        '<div><div>'+escapeHtml(t.approach)+'</div>' +
+        '<div class="regimen">'+escapeHtml(t.regimen)+'</div>' +
+        '<div class="evidence">Evidence: <span class="mono">'+escapeHtml(t.evidence)+'</span></div></div>' +
+      '</div>';
+    }).join("");
+    var txSub = function(label, arr){
+      return (arr && arr.length) ? '<div style="margin-top:16px;"><div style="font-size:11.5px;font-weight:600;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;">'+label+'</div>'+bullets(arr)+'</div>' : '';
+    };
+    // treatment_overview: preferred shape is an array of {heading, items, tone} sub-sections,
+    // rendered as a visual stage pathway — one colored card per clinical setting, connected
+    // top-to-bottom like a timeline, so the reader sees the whole disease course at a glance.
+    // tone (accent=early/localized, amber=locally advanced/adjuvant, rose=metastatic/recurrent,
+    // neutral=supportive/cross-cutting) is set per entry; defaults to neutral if absent.
+    // Falls back to a flat bullet list for legacy content that is still a plain string array.
+    var txIntro = "";
+    var tov = d.treatment_overview;
+    if (tov && tov.length){
+      if (typeof tov[0] === "object" && tov[0] !== null){
+        var stageItems = tov.map(function(sec){
+          var tone = ["accent","amber","rose","neutral"].indexOf(sec.tone) !== -1 ? sec.tone : "neutral";
+          return '<div class="stage-item">' +
+              '<div class="stage-marker"><span class="stage-dot tone-'+tone+'"></span><span class="stage-line"></span></div>' +
+              '<div class="stage-body"><div class="stage-card tone-'+tone+'"><h4>'+escapeHtml(sec.heading)+'</h4>'+bullets(sec.items)+'</div></div>' +
+            '</div>';
+        }).join("");
+        txIntro = '<div class="stage-path">'+stageItems+'</div>';
+      } else {
+        txIntro = '<div style="margin-bottom:14px;">'+bullets(tov)+'</div>';
+      }
+    }
+    html += block(ICONS.tx, "Treatment", txIntro + '<div class="tx-table">'+txRows+'</div>' +
+      txSub("Toxicity &amp; Monitoring", d.toxicity_monitoring) +
+      txSub("Follow-up / Surveillance", d.follow_up)
+    );
+
+    var src = d.source || {};
+    html += block(ICONS.src, "Source", '<div class="source-card"><span class="name">'+escapeHtml(src.name)+'</span><span class="meta mono">'+escapeHtml(src.version)+' · '+escapeHtml(src.date)+'</span></div>');
+
+    main.innerHTML = html;
+  }
+
+  // Accepts either an array of bullet strings (preferred) or a legacy
+  // plain string (rendered as a single bullet) — so older content still renders.
+  function bullets(val){
+    var arr = Array.isArray(val) ? val : (val ? [val] : []);
+    if (!arr.length) return '<p style="color:var(--ink-soft);">Not reported in the source.</p>';
+    return '<ul class="bul">'+arr.map(function(s){ return '<li>'+escapeHtml(s)+'</li>'; }).join("")+'</ul>';
+  }
+
+  function block(icon, title, bodyHtml){
+    return '<section class="block"><h3>'+icon+'<span>'+title+'</span></h3><div class="body">'+bodyHtml+'</div></section>';
+  }
+
+  function findItem(slug){
+    for (var i=0;i<GROUPS.length;i++){
+      for (var j=0;j<GROUPS[i].items.length;j++){
+        if (GROUPS[i].items[j].slug === slug) return GROUPS[i].items[j];
+      }
+    }
+    if (slug === TEMPLATE_SLUG) return {th:"ตัวอย่างโครงสร้าง", en:"Template"};
+    return null;
+  }
+
+  document.getElementById("search").addEventListener("input", function(e){
+    renderRail(e.target.value);
+  });
+
+  renderRail("");
+  renderMain(null);
+
+
+})();
+</script>
+</body>
+</html>
